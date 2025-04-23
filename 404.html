@@ -5,27 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Page Not Found - Shangri-La Beach Resort</title>
   <script>
-    // SPA Routing for GitHub Pages 
+    // Single-page app routing for GitHub Pages
     (function() {
-      // Get the repository name from the URL
-      var pathSegments = window.location.pathname.split('/');
-      var repoName = 'shangri-la-smith'; // Your repository name
+      // Repository name in GitHub
+      var repo = 'shangri-la-smith';
+      var pathSegmentsToKeep = 1; // Keeps just the repo name in the path
+
+      var l = window.location;
       
-      // Extract the path without the repo name prefix
-      var path = window.location.pathname;
-      if (path.indexOf('/' + repoName + '/') === 0) {
-        path = path.substr(repoName.length + 1);
+      // Get the current URL path excluding the repo name
+      var segmentCount = 0;
+      var location = window.location.pathname;
+      
+      // Handle repo name in the path
+      if (location.indexOf('/' + repo + '/') === 0) {
+        segmentCount = 1; // Count for the repo name segment
+        path = location.substring(('/' + repo).length);
+      } else {
+        path = location;
       }
       
-      // Redirect to the index page with the path as a query parameter
-      var redirectUrl = window.location.origin + 
-                       '/' + repoName + 
-                       '/?redirect=' + 
-                       encodeURIComponent(path) +
-                       window.location.search.replace(/^\?/, '&') + 
-                       window.location.hash;
-      
-      window.location.replace(redirectUrl);
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        '/' + repo + '/' + 
+        (path.startsWith('/') ? path.substr(1) : path) +
+        (l.search ? l.search : '') +
+        l.hash
+      );
     })();
   </script>
   <style>

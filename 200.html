@@ -2,13 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <link rel="icon" href="/favicon.png">
+    <base href="/shangri-la-smith/">
+    <link rel="icon" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shangri-La Beach Resort</title>
-    <meta name="description" content="Experience luxury and tranquility at Shangri-La Beach Resort. Book your dream vacation today!">
-    <meta http-equiv="refresh" content="0;url=/">
+    <title>Shangri-La Beach Resort - Luxury Tropical Paradise</title>
+    <meta name="description" content="Experience luxury and tranquility at Shangri-La Beach Resort. Enjoy pristine beaches, world-class dining, spa services, and exclusive accommodations. Book your dream vacation today!">
   </head>
   <body>
-    <p>Redirecting to homepage...</p>
+    <div id="app"></div>
+    <script>
+      // Fallback for GitHub Pages
+      // Redirect to index.html while preserving the URL
+      window.location.replace(
+        window.location.origin + '/shangri-la-smith/' + 
+        (window.location.search || '') + 
+        (window.location.hash || '')
+      );
+    </script>
   </body>
 </html>
