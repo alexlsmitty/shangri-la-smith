@@ -1,67 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Page Not Found - Shangri-La Beach Resort</title>
-  <script>
-    // Single-page app routing for GitHub Pages
-    (function() {
-      // Repository name in GitHub
-      var repo = 'shangri-la-smith';
-      var pathSegmentsToKeep = 1; // Keeps just the repo name in the path
-
-      var l = window.location;
-      
-      // Get the current URL path excluding the repo name
-      var segmentCount = 0;
-      var location = window.location.pathname;
-      
-      // Handle repo name in the path
-      if (location.indexOf('/' + repo + '/') === 0) {
-        segmentCount = 1; // Count for the repo name segment
-        path = location.substring(('/' + repo).length);
-      } else {
-        path = location;
+  <head>
+    <base href="/shangri-la-smith/shangri-la-smith/shangri-la-smith/">
+    <meta charset="UTF-8">
+    <base href="/shangri-la-smith/shangri-la-smith/">
+    <link rel="icon" href="./favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shangri-La Beach Resort - Luxury Tropical Paradise</title>
+    <meta name="description" content="Experience luxury and tranquility at Shangri-La Beach Resort. Enjoy pristine beaches, world-class dining, spa services, and exclusive accommodations. Book your dream vacation today!">
+    <meta name="keywords" content="resort, beach resort, luxury resort, vacation, tropical paradise, spa, luxury accommodations">
+    <meta name="author" content="Shangri-La Beach Resort">
+    <meta property="og:title" content="Shangri-La Beach Resort - Luxury Tropical Paradise">
+    <meta property="og:description" content="Experience luxury and tranquility at Shangri-La Beach Resort. Book your dream vacation today!">
+    <meta property="og:image" content="./meta/og-image.jpg">
+    <meta property="og:url" content="https://shangri-la-beach-resort.vercel.app">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="theme-color" content="#00a69c">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="importmap">
+    {
+      "imports": {
+        "vue": "https://unpkg.com/vue@3.5.13/dist/vue.esm-browser.prod.js",
+        "vue-router": "https://unpkg.com/vue-router@4.5.0/dist/vue-router.esm-browser.js",
+        "vuetify": "https://unpkg.com/vuetify@3.3.23/dist/vuetify.esm.js",
+        "@vueuse/core": "https://unpkg.com/@vueuse/core@10.7.0/index.mjs"
       }
-      
-      l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        '/' + repo + '/' + 
-        (path.startsWith('/') ? path.substr(1) : path) +
-        (l.search ? l.search : '') +
-        l.hash
-      );
-    })();
-  </script>
-  <style>
-    body {
-      font-family: 'Montserrat', sans-serif;
-      background-color: #f5f9fd;
-      color: #333;
-      text-align: center;
-      padding: 50px 20px;
-      margin: 0;
     }
-    h1 {
-      color: #00a69c;
-      font-size: 2rem;
-    }
-    p {
-      margin: 20px 0;
-      font-size: 1.1rem;
-    }
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-    }
-  </style>
+    </script>
+    <script type="module" crossorigin src="/shangri-la-smith/shangri-la-smith/shangri-la-smith/assets/main-CCQuOFSY.js"></script>
+    <link rel="modulepreload" crossorigin href="/shangri-la-smith/shangri-la-smith/shangri-la-smith/assets/vendor-CRTejrwt.js">
+    <link rel="modulepreload" crossorigin href="/shangri-la-smith/shangri-la-smith/shangri-la-smith/assets/ui-framework-zg02FQwb.js">
+    <link rel="stylesheet" crossorigin href="/shangri-la-smith/shangri-la-smith/shangri-la-smith/assets/styles/vendor-WOtlixU8.css">
+    <link rel="stylesheet" crossorigin href="/shangri-la-smith/shangri-la-smith/shangri-la-smith/assets/styles/main-DH0jwep8.css">
+
 </head>
-<body>
-  <div class="container">
-    <h1>Page Not Found</h1>
-    <p>Redirecting you to the homepage...</p>
-    <p>If you are not redirected automatically, please <a href="/shangri-la-smith/">click here</a>.</p>
-  </div>
+  <body>
+    <div id="app"></div>
+  <script src="/shangri-la-smith/404-spa-redirect.js"></script>
 </body>
 </html>

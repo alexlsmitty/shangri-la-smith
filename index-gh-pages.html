@@ -16,6 +16,18 @@
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="theme-color" content="#00a69c">
+    <!-- Import map for GitHub Pages - handles direct module imports -->
+    <script type="importmap">
+    {
+      "imports": {
+        "vue": "https://unpkg.com/vue@3.3.11/dist/vue.esm-browser.prod.js",
+        "vue-router": "https://unpkg.com/vue-router@4.2.5/dist/vue-router.esm-browser.js",
+        "vuetify": "https://unpkg.com/vuetify@3.3.23/dist/vuetify.esm.js",
+        "@vueuse/core": "https://unpkg.com/@vueuse/core@10.7.0/index.mjs",
+        "@supabase/supabase-js": "https://unpkg.com/@supabase/supabase-js@2.39.3/dist/module/index.js"
+      }
+    }
+    </script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,7 +38,11 @@
     <!-- GitHub Pages Path Correction -->
     <script>
       // Tell Vite build system this is the correct base path for GitHub Pages
-      window.PUBLIC_PATH = '/shangri-la-smith/';
+      window.BASE_URL = '/shangri-la-smith/';
+      
+      // Fix for module resolution in GitHub Pages
+      window.__VUE_OPTIONS_API__ = true;
+      window.__VUE_PROD_DEVTOOLS__ = false;
     </script>
   </body>
 </html>
