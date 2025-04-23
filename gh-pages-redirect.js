@@ -1,4 +1,4 @@
-// Single Page App redirect for GitHub Pages
+// Handle GitHub Pages SPA routing
 (function() {
   const l = window.location;
   if (l.search) {
@@ -9,10 +9,11 @@
     });
     if (q.redirect) {
       const path = q.redirect.replace(/~and~/g, '&');
-      window.history.replaceState(null, null,
-        l.pathname.slice(0, -1) + (path.startsWith('/') ? path : '/' + path) +
-        (q.query ? ('?' + q.query) : '') + l.hash
+      history.replaceState(null, null, 
+        l.pathname.slice(0, -1) + (path.startsWith('/') ? path : '/' + path) + 
+        (q.query ? ('?' + q.query) : '') + 
+        l.hash
       );
     }
   }
-}());
+})();
