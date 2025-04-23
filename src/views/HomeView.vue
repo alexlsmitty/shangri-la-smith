@@ -179,7 +179,7 @@ const testimonials = [
             <h1 class="text-h2 font-weight-bold mb-4 text-white animate-title">
               Shangri-La Beach Resort
             </h1>
-            <h2 class="text-h4 mb-6 text-white animate-subtitle">Your Dream Getaway</h2>
+            <h2 class="text-h4 mb-6 text-white animate-subtitle">Your Luxury Tropical Paradise</h2>
             <v-btn
               class="mt-4 px-6 py-3 animate-button"
               color="primary"

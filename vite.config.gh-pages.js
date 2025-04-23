@@ -2,6 +2,8 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
+import fs from 'fs'
+import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -25,7 +27,7 @@ export default defineConfig({
     minify: 'terser', // Use terser for better minification
     terserOptions: {
       compress: {
-        drop_console: false, // Keep console logs during deployment testing
+        drop_console: false, // Keep console logs during troubleshooting
         drop_debugger: true
       }
     },
@@ -34,9 +36,6 @@ export default defineConfig({
       polyfill: true
     },
     rollupOptions: {
-      input: {
-        main: fileURLToPath(new URL('./index.html', import.meta.url)),
-      },
       output: {
         manualChunks: (id) => {
           // Group node_modules code into a vendor chunk
@@ -54,10 +53,7 @@ export default defineConfig({
             return 'assets/styles/[name]-[hash][extname]'
           }
           return 'assets/[name]-[hash][extname]'
-        },
-        // Ensure proper paths in JS files
-        entryFileNames: 'assets/[name]-[hash].js',
-        chunkFileNames: 'assets/[name]-[hash].js',
+        }
       }
     }
   },
@@ -74,26 +70,14 @@ export default defineConfig({
     {
       name: 'html-transform',
       transformIndexHtml(html) {
-        // Add base tag
-        html = html.replace(
-          '<head>',
-          '<head>\n    <base href="/shangri-la-smith/">'
-        );
+        // Add base tag if it doesn't exist
+        if (!html.includes('<base href=')) {
+          html = html.replace('<head>', '<head>\n    <base href="/shangri-la-smith/">') 
+        }
         
-        // Fix asset paths - ensure they start with the base path
-        html = html.replace(
-          /src="\//g,
-          'src="/shangri-la-smith/'
-        );
-        html = html.replace(
-          /href="\//g,
-          'href="/shangri-la-smith/'
-        );
-        
-        // Add importmap for external modules
-        html = html.replace(
-          '</head>',
-          `  <script type="importmap">
+        // Add import map for resolving bare module specifiers
+        if (!html.includes('importmap')) {
+          html = html.replace('</head>', `  <script type="importmap">
     {
       "imports": {
         "vue": "https://unpkg.com/vue@3.5.13/dist/vue.esm-browser.prod.js",
@@ -103,10 +87,68 @@ export default defineConfig({
       }
     }
     </script>
-</head>`
-        );
+</head>`)
+        }
         
-        return html;
+        // Fix asset paths
+        html = html.replace(/src="\//g, 'src="/shangri-la-smith/')
+        html = html.replace(/href="\//g, 'href="/shangri-la-smith/')
+        
+        return html
+      }
+    },
+    {
+      name: 'post-build',
+      closeBundle() {
+        // This runs after the build is complete
+        const distDir = path.resolve(__dirname, 'dist')
+        const indexPath = path.join(distDir, 'index.html')
+        
+        // If we have an index.html file
+        if (fs.existsSync(indexPath)) {
+          // Read its content
+          const indexContent = fs.readFileSync(indexPath, 'utf8')
+          
+          // Create a 404.html file for SPA routing
+          fs.writeFileSync(path.join(distDir, '404.html'), indexContent)
+          
+          // Create a script for client-side redirects
+          const redirectScript = `
+// Handle GitHub Pages SPA routing
+(function() {
+  const l = window.location;
+  if (l.search) {
+    const q = {};
+    l.search.slice(1).split('&').forEach(v => {
+      const a = v.split('=');
+      q[a[0]] = a[1];
+    });
+    if (q.redirect) {
+      const path = q.redirect.replace(/~and~/g, '&');
+      history.replaceState(null, null, 
+        l.pathname.slice(0, -1) + (path.startsWith('/') ? path : '/' + path) + 
+        (q.query ? ('?' + q.query) : '') + 
+        l.hash
+      );
+    }
+  }
+})();`
+          
+          fs.writeFileSync(path.join(distDir, 'gh-pages-redirect.js'), redirectScript)
+          
+          // Add the redirect script to both index.html and 404.html
+          const scriptTag = `<script src="/shangri-la-smith/gh-pages-redirect.js"></script>`
+          
+          if (!indexContent.includes('gh-pages-redirect.js')) {
+            const newIndexContent = indexContent.replace('</body>', `${scriptTag}\n</body>`)
+            fs.writeFileSync(indexPath, newIndexContent)
+            
+            // Update 404.html too
+            fs.writeFileSync(path.join(distDir, '404.html'), newIndexContent)
+          }
+          
+          console.log('\u2705 Post-build processing for GitHub Pages completed')
+        }
       }
     }
   ],

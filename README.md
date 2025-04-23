@@ -69,7 +69,7 @@ The Shangri-La Beach Resort website showcases the resort's luxury accommodations
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/shangri-la-smith.git
+   git clone https://github.com/alexlsmitty/shangri-la-smith.git
    cd shangri-la-smith
    ```
 
@@ -100,7 +100,7 @@ The project is configured for deployment on both Vercel and GitHub Pages:
 ### GitHub Pages Deployment
 - The site is deployed via GitHub Actions using the included workflow
 - Automatically builds and deploys to GitHub Pages on push to main branch
-- Available at [https://yourusername.github.io/shangri-la-smith/](https://yourusername.github.io/shangri-la-smith/)
+- Available at [https://alexlsmitty.github.io/shangri-la-smith/](https://alexlsmitty.github.io/shangri-la-smith/)
 - To configure GitHub Pages deployment:
   1. Ensure your repository name matches the `base` path in `vite.config.gh-pages.js`
   2. Set up repository secrets for environment variables (Settings > Secrets > Actions):
@@ -127,3 +127,11 @@ The project is configured for deployment on both Vercel and GitHub Pages:
 - SVG icons from [Material Design Icons](https://materialdesignicons.com/)
 - Database services provided by [Supabase](https://supabase.com)
 - Built with [Vue.js](https://vuejs.org/) and [Vuetify](https://vuetifyjs.com/)
+
+## 🔄 Update - April 23, 2025
+
+- Fixed GitHub Pages deployment with proper module resolution
+- Added import map for external dependencies
+- Improved SPA routing on GitHub Pages with proper 404.html handling
+- Updated home page subtitle to "Your Luxury Tropical Paradise"
+- Optimized asset loading for faster page rendering
