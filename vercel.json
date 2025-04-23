@@ -30,8 +30,9 @@
       "dest": "/$1"
     },
     {
-      "src": ".*",
+      "src": "^(?!/api).*",
       "dest": "/index.html"
     }
-  ]
+  ],
+  "outputDirectory": "dist"
 }

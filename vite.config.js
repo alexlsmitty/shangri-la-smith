@@ -6,7 +6,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/',
+  base: '/', // Using root path for better compatibility with Vercel
   plugins: [
     vue({
       template: {
