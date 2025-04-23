@@ -11,7 +11,7 @@
     "format": "prettier --write src/",
     "init-db": "node init-db.js",
     "start": "node server.js",
-    "vercel-build": "vite build",
+    "vercel-build": "npm run init-db && vite build",
     "check-deployment": "vite build --debug --mode production && vite preview",
     "verify-deployment": "node --experimental-json-modules deployment-check.js",
     "build-check": "node --experimental-json-modules build-check.js",

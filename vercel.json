@@ -1,96 +1,15 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
+  "buildCommand": "npm run vercel-build",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs18.x"
     }
-  ],
+  },
   "routes": [
-    {
-      "src": "/api/rooms",
-      "dest": "/api/rooms.js"
-    },
-    {
-      "src": "/api/room",
-      "dest": "/api/room.js"
-    },
-    {
-      "src": "/api/availability",
-      "dest": "/api/availability.js"
-    },
-    {
-      "src": "/api/bookings",
-      "dest": "/api/bookings.js" 
-    },
-    {
-      "src": "/api/booking",
-      "dest": "/api/booking.js"
-    },
-    {
-      "src": "/api/spa/categories",
-      "dest": "/api/spa.js"
-    },
-    {
-      "src": "/api/spa/services(.*)",
-      "dest": "/api/spa.js"
-    },
-    {
-      "src": "/api/spa/appointment(.*)",
-      "dest": "/api/spa.js"
-    },
-    {
-      "src": "/api/spa/appointments(.*)",
-      "dest": "/api/spa.js"
-    },
-    {
-      "src": "/api/testimonials(.*)",
-      "dest": "/api/testimonials.js"
-    },
-    {
-      "src": "/api/auth/(.*)",
-      "dest": "/api/auth.js"
-    },
-    {
-      "src": "/assets/(.*)",
-      "dest": "/dist/assets/$1"
-    },
-    {
-      "src": "/(.*)\\.js",
-      "dest": "/dist/$1.js"
-    },
-    {
-      "src": "/(.*)\\.css",
-      "dest": "/dist/$1.css"
-    },
-    {
-      "src": "/(.*)\\.svg",
-      "dest": "/dist/$1.svg"
-    },
-    {
-      "src": "/(.*)\\.webp",
-      "dest": "/dist/$1.webp"
-    },
-    {
-      "src": "/favicon.png",
-      "dest": "/dist/favicon.png"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/dist/index.html"
-    }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+    { "handle": "filesystem" },
+    { "src": "/api/(.*)", "dest": "/api/$1.js" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
 }
