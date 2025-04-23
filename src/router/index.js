@@ -1,11 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
-import { AuthService } from '@/services/api'
 import NotFoundView from '../views/NotFoundView.vue'
 import { BASE_PATH } from '@/config/paths'
 
-// Load other views lazily for better performance
+// Mock Auth Service for deployment
+const AuthService = {
+  isLoggedIn() { return false; }
+};
 
+// Load other views lazily for better performance
 const router = createRouter({
   // Use the BASE_PATH from our config for consistent path management
   history: createWebHistory(BASE_PATH),

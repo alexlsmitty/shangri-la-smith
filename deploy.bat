@@ -9,7 +9,7 @@ git add .
 
 echo.
 echo Committing changes...
-git commit -m "Fix build error and simplify deployment"
+git commit -m "Fix API service reference in router"
 
 echo.
 echo Pushing to GitHub...

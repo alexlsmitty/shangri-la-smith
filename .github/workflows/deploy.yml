@@ -5,6 +5,12 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -20,28 +26,27 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Create simple build
+        
+      - name: Verify repo structure
         run: |
-          # Update vite.config.js to ensure it has the right base path
-          echo "
-          import { defineConfig } from 'vite'
-          import vue from '@vitejs/plugin-vue'
-
-          export default defineConfig({
-            base: '/shangri-la-smith/',
-            plugins: [vue()]
-          })
-          " > vite.config.js
-          
-          # Build the project
+          echo "Checking for required files..."
+          ls -la
+          ls -la src/router/
+          cat src/router/index.js | head -n 20
+      
+      - name: Build the site
+        run: |
+          # Simple build
           npm run build
           
-          # Add redirects for SPA
-          cp dist/index.html dist/404.html
+          # Check the build output
+          ls -la dist/
           
-          # Ensure no Jekyll processing
+          # Create .nojekyll file
           touch dist/.nojekyll
+          
+          # Copy index.html to 404.html for SPA routing
+          cp dist/index.html dist/404.html
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
@@ -52,3 +57,4 @@ jobs:
         with:
           folder: dist
           branch: gh-pages
+          clean: true
