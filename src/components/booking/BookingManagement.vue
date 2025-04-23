@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { BookingService } from '@/services/api';
+// Import directly from the lib/supabase instead of using the API service
+import { selectData, updateData } from '@/lib/supabase';
 
 // Bookings list
 const bookings = ref([]);
@@ -27,13 +28,42 @@ async function loadBookingsByEmail() {
   
   try {
     const email = searchEmail.value.toLowerCase().trim();
-    const data = await BookingService.getBookingsByEmail(email);
     
-    bookings.value = data;
-    filteredBookings.value = [...data];
+    console.log(`Searching for bookings with email: ${email}`);
+    
+    // Use Supabase directly to query bookings by email
+    const bookingsData = await selectData('bookings', {
+      select: '*, rooms_types(name, price_per_night)',
+      filters: {
+        guest_email: email
+      }
+    });
+    
+    console.log('Bookings found:', bookingsData);
+    
+    // Transform the data to match the expected format
+    const formattedBookings = bookingsData.map(booking => ({
+      id: booking.id,
+      booking_reference: booking.reference,
+      room_name: booking.rooms_types?.name || 'Room',
+      status: booking.status,
+      total_price: booking.total_price,
+      check_in_date: booking.check_in_date,
+      check_out_date: booking.check_out_date,
+      adults: Math.floor(booking.guests_count || 1),
+      children: booking.guests_count ? Math.max(0, booking.guests_count - Math.floor(booking.guests_count)) : 0,
+      email: booking.guest_email,
+      first_name: booking.guest_name?.split(' ')[0] || '',
+      last_name: booking.guest_name?.split(' ')[1] || '',
+      phone: booking.phone || '',
+      special_requests: booking.special_requests
+    }));
+    
+    bookings.value = formattedBookings;
+    filteredBookings.value = [...formattedBookings];
   } catch (err) {
     console.error('Error loading bookings:', err);
-    error.value = err.response?.data?.error || 'Failed to load bookings. Please try again.';
+    error.value = 'Failed to load bookings. Please try again.';
     bookings.value = [];
     filteredBookings.value = [];
   } finally {
@@ -57,10 +87,21 @@ async function handleCancelBooking(bookingReference) {
   if (confirm('Are you sure you want to cancel this booking?')) {
     try {
       loading.value = true;
-      await BookingService.cancelBooking(bookingReference);
       
+      console.log(`Cancelling booking with reference: ${bookingReference}`);
+      
+      // Update the booking status to 'cancelled'
+      const result = await updateData(
+        'bookings',
+        { status: 'cancelled' },
+        { reference: bookingReference }
+      );
+      
+      console.log('Cancellation result:', result);
       alert('Booking cancelled successfully!');
-      loadBookingsByEmail(); // Reload bookings to reflect the change
+      
+      // Reload bookings to reflect the change
+      loadBookingsByEmail();
     } catch (err) {
       console.error('Error cancelling booking:', err);
       alert('Failed to cancel booking. Please try again.');

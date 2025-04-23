@@ -2,6 +2,10 @@
 import { ref, onMounted, computed } from 'vue'
 import { useIntersectionObserver } from '@vueuse/core'
 import SectionHeading from '@/components/SectionHeading.vue'
+import { useDisplay } from 'vuetify'
+
+// Initialize display composable at setup level
+const display = useDisplay()
 
 // Unused but kept for documentation purposes
 // function getOptimizedImagePath(imagePath) {
@@ -48,7 +52,7 @@ const activities = ref({
       duration: '60 minutes',
       price: 'Complimentary',
       location: 'Beach Front',
-      image: new URL('@/assets/images/general/meditativebeach.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/meditativebeach_compressed.webp', import.meta.url).href,
       icon: 'mdi-yoga',
       featured: true,
     },
@@ -64,7 +68,7 @@ const activities = ref({
       duration: '45 minutes',
       price: 'Complimentary',
       location: 'Zen Garden',
-      image: new URL('@/assets/images/general/meditation.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/meditation_compressed.webp', import.meta.url).href,
       icon: 'mdi-meditation',
     },
     {
@@ -79,7 +83,7 @@ const activities = ref({
       duration: 'As desired',
       price: 'Complimentary',
       location: 'Main Beach',
-      image: new URL('@/assets/images/general/nicebeach.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/nicebeach_compressed.webp', import.meta.url).href,
       icon: 'mdi-beach',
     },
     {
@@ -94,7 +98,7 @@ const activities = ref({
       duration: 'As desired',
       price: 'Complimentary',
       location: 'Main Pool Deck',
-      image: new URL('@/assets/images/general/beachpool.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/beachpool_compressed.webp', import.meta.url).href,
       icon: 'mdi-pool',
     },
     {
@@ -108,7 +112,7 @@ const activities = ref({
       duration: 'As desired',
       price: 'Equipment rental: $15/hour',
       location: 'Water Sports Center',
-      image: new URL('@/assets/images/general/snorkeling.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/snorkeling_compressed.webp', import.meta.url).href,
       icon: 'mdi-diving-scuba-mask',
       featured: true,
     },
@@ -122,7 +126,7 @@ const activities = ref({
       duration: 'As desired',
       price: 'Rental: $20/hour',
       location: 'Water Sports Center',
-      image: new URL('@/assets/images/general/kayaking.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/kayaking_compressed.webp', import.meta.url).href,
       icon: 'mdi-kayaking',
     },
     {
@@ -135,7 +139,7 @@ const activities = ref({
       duration: 'As desired',
       price: 'Rental: $25/hour',
       location: 'Water Sports Center',
-      image: new URL('@/assets/images/general/marinaboats.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/marinaboats_compressed.webp', import.meta.url).href,
       icon: 'mdi-surfing',
     },
     {
@@ -148,7 +152,7 @@ const activities = ref({
       duration: 'As desired',
       price: 'Complimentary',
       location: 'Beach Sports Area',
-      image: new URL('@/assets/images/general/beach-volleyball.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/beach-volleyball_compressed.webp', import.meta.url).href,
       icon: 'mdi-volleyball',
     },
     {
@@ -162,7 +166,7 @@ const activities = ref({
       duration: 'As desired',
       price: 'Complimentary',
       location: 'Wellness Center, 2nd Floor',
-      image: new URL('@/assets/images/general/beachpool2.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/beachpool2_compressed.webp', import.meta.url).href,
       icon: 'mdi-dumbbell',
     },
     {
@@ -177,7 +181,7 @@ const activities = ref({
       duration: 'Flexible',
       price: 'Complimentary',
       location: "Kids' Club",
-      image: new URL('@/assets/images/general/gardencritter.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/gardencritter_compressed.webp', import.meta.url).href,
       icon: 'mdi-human-child',
     },
   ],
@@ -194,7 +198,7 @@ const activities = ref({
       duration: 'Half-day (3 hours)',
       price: '$75 per person',
       location: 'Departs from Marina',
-      image: new URL('@/assets/images/general/diving.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/diving_compressed.webp', import.meta.url).href,
       icon: 'mdi-diving-scuba-mask',
       featured: true,
     },
@@ -209,7 +213,7 @@ const activities = ref({
       duration: 'Full-day (7 hours)',
       price: '$120 per person',
       location: 'Departs from Marina',
-      image: new URL('@/assets/images/general/islandhopping.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/islandhopping_compressed.webp', import.meta.url).href,
       icon: 'mdi-ferry',
     },
     {
@@ -223,7 +227,7 @@ const activities = ref({
       duration: 'Half-day (4 hours) or Full-day (6 hours)',
       price: 'Half-day: $85, Full-day: $110 per person',
       location: 'Departs from Resort Lobby',
-      image: new URL('@/assets/images/general/rainforesthike.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/rainforesthike_compressed.webp', import.meta.url).href,
       icon: 'mdi-forest',
     },
     {
@@ -237,7 +241,7 @@ const activities = ref({
       duration: '2 hours',
       price: '$95 per person',
       location: 'Departs from Marina',
-      image: new URL('@/assets/images/general/beachpool.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/beachpool_compressed.webp', import.meta.url).href,
       icon: 'mdi-sail-boat',
     },
     {
@@ -251,7 +255,7 @@ const activities = ref({
       duration: 'Half-day (4 hours)',
       price: '$65 per person',
       location: 'Departs from Resort Lobby',
-      image: new URL('@/assets/images/general/nicebeach.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/nicebeach_compressed.webp', import.meta.url).href,
       icon: 'mdi-home-group',
     },
     {
@@ -265,7 +269,7 @@ const activities = ref({
       duration: 'Half-day (4 hours)',
       price: '$85 per person',
       location: 'Departs from Resort Lobby',
-      image: new URL('@/assets/images/general/cooking.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/cooking_compressed.webp', import.meta.url).href,
       icon: 'mdi-chef-hat',
     },
     {
@@ -279,7 +283,7 @@ const activities = ref({
       duration: '90 minutes',
       price: '$45 per person',
       location: 'Resort Amphitheater',
-      image: new URL('@/assets/images/general/culturaldance.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/culturaldance_compressed.webp', import.meta.url).href,
       icon: 'mdi-drama-masks',
       featured: true,
     },
@@ -294,7 +298,7 @@ const activities = ref({
       duration: 'Half-day or Full-day',
       price: 'From $110 per person',
       location: 'Dive Center',
-      image: new URL('@/assets/images/general/deepdiving.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/deepdiving_compressed.webp', import.meta.url).href,
       icon: 'mdi-diving-scuba',
     },
     {
@@ -308,7 +312,7 @@ const activities = ref({
       duration: 'Half-day (4 hours)',
       price: '$70 per person',
       location: 'Departs from Resort Lobby',
-      image: new URL('@/assets/images/general/monkeyeatingcorn.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/monkeyeatingcorn_compressed.webp', import.meta.url).href,
       icon: 'mdi-paw',
     },
     {
@@ -322,7 +326,7 @@ const activities = ref({
       duration: 'Half-day (4 hours) or Full-day (8 hours)',
       price: 'Half-day: $150, Full-day: $250 per person',
       location: 'Departs from Marina',
-      image: new URL('@/assets/images/general/marinaboats.webp', import.meta.url).href,
+      image: new URL('@/assets/images/compressed/marinaboats_compressed.webp', import.meta.url).href,
       icon: 'mdi-fish',
     },
   ],
@@ -440,6 +444,19 @@ const heroSection = ref(null)
 const featuredSection = ref(null)
 const activitiesSection = ref(null)
 
+// Function to scroll to an element
+function scrollToElement(elementId) {
+  const element = document.getElementById(elementId)
+  if (element) {
+    const offsetTop = display.mobile.value ? 20 : 50
+    
+    window.scrollTo({
+      top: element.offsetTop - offsetTop,
+      behavior: 'smooth'
+    })
+  }
+}
+
 // For interactive category display
 const getColorForCategory = (category) => {
   const colors = {
@@ -515,7 +532,7 @@ onMounted(() => {
                 class="px-6 py-3"
                 elevation="3"
                 rounded
-                @click="$vuetify.goTo('#featured')"
+                @click="scrollToElement('featured')"
               >
                 Explore Activities
                 <v-icon right class="ml-2">mdi-chevron-down</v-icon>
@@ -630,6 +647,8 @@ onMounted(() => {
                           size="small"
                           :color="getColorForCategory(activity.category)"
                           class="mb-4"
+                          variant="flat"
+                          text-color="white"
                         >
                           {{ activity.category }}
                         </v-chip>
@@ -781,25 +800,11 @@ onMounted(() => {
                             </div>
                           </template>
 
-                          <div class="d-flex flex-column fill-height justify-end pa-4">
-                            <v-chip
-                              size="x-small"
-                              :color="getColorForCategory(activity.category)"
-                              class="mb-2 category-chip"
-                            >
-                              {{
-                                activeSection.value === 'all'
-                                  ? activity.id <= 10
-                                    ? 'Resort Activity'
-                                    : 'Local Excursion'
-                                  : ''
-                              }}
-                            </v-chip>
-                          </div>
+                          <!-- Activity badge replaced with category in the title -->
                         </v-img>
 
                         <v-card-item>
-                          <v-card-title class="pb-1 d-flex align-center">
+                          <div class="pb-1 d-flex align-center">
                             <v-avatar
                               :color="getColorForCategory(activity.category)"
                               class="mr-3 activity-icon-avatar"
@@ -807,8 +812,14 @@ onMounted(() => {
                             >
                               <v-icon color="white" size="20">{{ activity.icon }}</v-icon>
                             </v-avatar>
-                            {{ activity.title }}
-                          </v-card-title>
+                            <div>
+                              <v-card-title class="pb-0 pt-0">{{ activity.title }}</v-card-title>
+                              <v-card-subtitle class="pt-0">
+                                <span :class="`text-${getColorForCategory(activity.category)}`">{{ activity.category }}</span>
+                                <span v-if="activeSection.value === 'all'" class="ml-1 text-medium-emphasis">• {{ activity.id <= 10 ? 'Resort Activity' : 'Local Excursion' }}</span>
+                              </v-card-subtitle>
+                            </div>
+                          </div>
                         </v-card-item>
 
                         <v-card-text class="pt-0">
@@ -873,6 +884,8 @@ onMounted(() => {
               size="small"
               :color="getColorForCategory(selectedActivity.category)"
               class="mb-2"
+              variant="flat"
+              text-color="white"
             >
               {{ selectedActivity.category }}
             </v-chip>
@@ -996,10 +1009,7 @@ onMounted(() => {
           <v-btn
             color="primary"
             class="ml-2"
-            @click="
-              $vuetify.goTo('#featured')
-              showDetailModal = false
-            "
+            @click="scrollToElement('featured'); showDetailModal = false"
           >
             Explore More Activities
           </v-btn>
@@ -1071,7 +1081,7 @@ onMounted(() => {
 .activities-hero-bg {
   height: 100%;
   width: 100%;
-  background-image: url('@/assets/images/general/meditativebeach.webp');
+  background-image: url('@/assets/images/compressed/meditativebeach_compressed.webp');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -1162,6 +1172,7 @@ onMounted(() => {
 
 .category-chip {
   backdrop-filter: blur(5px);
+  font-weight: 600 !important;
 }
 
 /* Activity Cards */

@@ -213,6 +213,95 @@ export const BookingService = {
   },
 }
 
+// Spa-related API services
+export const SpaService = {
+  // Get all spa services
+  async getAllServices() {
+    try {
+      const response = await apiClient.get('/spa/services')
+      return handleApiResponse(response)
+    } catch (err) {
+      return handleApiError(err)
+    }
+  },
+
+  // Get spa service details by id
+  async getServiceById(id) {
+    try {
+      const response = await apiClient.get(`/spa/services/${id}`)
+      return handleApiResponse(response)
+    } catch (err) {
+      return handleApiError(err)
+    }
+  },
+
+  // Get spa services by category
+  async getServicesByCategory(categoryId) {
+    try {
+      const response = await apiClient.get(`/spa/services/category/${categoryId}`)
+      return handleApiResponse(response)
+    } catch (err) {
+      return handleApiError(err)
+    }
+  },
+
+  // Check spa appointment availability
+  async checkAvailability(serviceId, date) {
+    try {
+      const response = await apiClient.get('/spa/appointments/available', {
+        params: { serviceId, date },
+      })
+      return handleApiResponse(response)
+    } catch {
+      return { available: true, fallback: true } // Optimistic fallback
+    }
+  },
+
+  // Create a new spa appointment
+  async createAppointment(appointmentData) {
+    try {
+      const response = await apiClient.post('/spa/appointments', appointmentData)
+      return handleApiResponse(response)
+    } catch (err) {
+      return handleApiError(err)
+    }
+  },
+
+  // Get spa appointment by reference
+  async getAppointmentByReference(reference) {
+    try {
+      const response = await apiClient.get(`/spa/appointment?reference=${reference}`)
+      return handleApiResponse(response)
+    } catch (err) {
+      return handleApiError(err)
+    }
+  },
+
+  // Cancel a spa appointment
+  async cancelAppointment(reference) {
+    try {
+      const response = await apiClient.put(`/spa/appointment?reference=${reference}`, {
+        action: 'cancel',
+      })
+      return handleApiResponse(response)
+    } catch (err) {
+      return handleApiError(err)
+    }
+  },
+
+  // Update special requests for a spa appointment
+  async updateAppointmentRequests(reference, specialRequests) {
+    try {
+      const response = await apiClient.put(`/spa/appointment?reference=${reference}`, {
+        special_requests: specialRequests,
+      })
+      return handleApiResponse(response)
+    } catch (err) {
+      return handleApiError(err)
+    }
+  },
+}
+
 // Authentication-related API services
 export const AuthService = {
   // Register a new user
@@ -322,6 +411,7 @@ export const AuthService = {
 export default {
   RoomService,
   BookingService,
+  SpaService,
   AuthService,
   fallbackState,
 }

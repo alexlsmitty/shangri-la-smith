@@ -1,13 +1,52 @@
-import { getDb, generateBookingReference, isRoomAvailable, formatDateForDb, initDb } from './_utils/db.js';
-import { 
-  handleError, 
-  setCorsHeaders, 
-  parseBody, 
-  validateRequiredFields,
-  sendSuccessResponse, 
-  sendErrorResponse,
-  getUserFromToken
-} from './_utils/middleware.js';
+import { selectData, insertData, getCurrentUser } from '../lib/supabase.js';
+import { randomBytes } from 'crypto';
+
+/**
+ * Generate a unique booking reference
+ * @returns {string} A unique booking reference code
+ */
+function generateBookingReference() {
+  // Generate a random string and take the first 8 characters
+  return randomBytes(4).toString('hex').toUpperCase();
+}
+
+/**
+ * Check if a room is available for the specified dates
+ * @param {number} roomTypeId - The room type ID
+ * @param {string} checkInDate - Check-in date in ISO format
+ * @param {string} checkOutDate - Check-out date in ISO format
+ * @returns {Promise<boolean>} True if the room is available
+ */
+async function isRoomAvailable(roomTypeId, checkInDate, checkOutDate) {
+  // Look for any overlapping bookings
+  const bookings = await selectData('bookings', {
+    select: 'id',
+    filters: { 
+      room_type_id: roomTypeId,
+      status: 'confirmed'
+    }
+  });
+
+  // Parse dates
+  const checkIn = new Date(checkInDate);
+  const checkOut = new Date(checkOutDate);
+
+  // Filter bookings that overlap with the requested date range
+  const overlappingBookings = bookings.filter(booking => {
+    const bookingCheckIn = new Date(booking.check_in_date);
+    const bookingCheckOut = new Date(booking.check_out_date);
+
+    // Check if there's an overlap
+    return (
+      (checkIn >= bookingCheckIn && checkIn < bookingCheckOut) ||
+      (checkOut > bookingCheckIn && checkOut <= bookingCheckOut) ||
+      (checkIn <= bookingCheckIn && checkOut >= bookingCheckOut)
+    );
+  });
+
+  // Room is available if there are no overlapping bookings
+  return overlappingBookings.length === 0;
+}
 
 /**
  * GET /api/bookings?email=user@example.com
@@ -20,18 +59,7 @@ import {
  * Create a new booking
  */
 export default async (req, res) => {
-  // Set CORS headers
-  setCorsHeaders(req, res);
-  
-  // Initialize database in production environment
-  if (process.env.NODE_ENV === 'production') {
-    await initDb();
-  }
-
   try {
-    // Connect to the database
-    const db = await getDb();
-
     // Handle route paths
     const urlParts = req.url.split('?')[0].split('/');
     const path = urlParts[3]; // Get the third segment of the URL path
@@ -39,41 +67,68 @@ export default async (req, res) => {
     // GET /api/bookings/my-bookings - Get authenticated user's bookings
     if (req.method === 'GET' && path === 'my-bookings') {
       // Get user from auth token
-      const user = await getUserFromToken(req, db);
+      const user = await getCurrentUser();
       
       if (!user) {
-        return sendErrorResponse(res, 'Authentication required', 401);
+        return res.status(401).json({
+          success: false,
+          error: 'Authentication required'
+        });
       }
 
-      const bookings = await db.all(`
-        SELECT 
-          b.id,
-          b.booking_reference,
-          b.room_type_id,
-          rt.name AS room_name,
-          rt.slug AS room_slug,
-          b.check_in_date,
-          b.check_out_date,
-          b.adults,
-          b.children,
-          b.first_name,
-          b.last_name,
-          b.email,
-          b.phone,
-          b.special_requests,
-          b.payment_method,
-          b.total_price,
-          b.status,
-          b.booking_date,
-          b.cancelled_date,
-          (SELECT image_url FROM room_images WHERE room_type_id = b.room_type_id ORDER BY display_order ASC LIMIT 1) AS room_image
-        FROM bookings b
-        JOIN room_types rt ON b.room_type_id = rt.id
-        WHERE b.user_id = ?
-        ORDER BY b.booking_date DESC
-      `, [user.id]);
+      // Get bookings for this user
+      const bookings = await selectData('bookings', {
+        select: `
+          id,
+          reference,
+          room_type_id,
+          check_in_date,
+          check_out_date,
+          guest_count,
+          guest_name,
+          guest_email,
+          special_requests,
+          total_price,
+          status,
+          created_at,
+          updated_at,
+          room_types (
+            id, 
+            name,
+            slug
+          ),
+          room_images (
+            image_url
+          )
+        `,
+        filters: { user_id: user.id }
+      });
+      
+      // Format the bookings data
+      const formattedBookings = bookings.map(booking => ({
+        id: booking.id,
+        booking_reference: booking.reference,
+        room_type_id: booking.room_type_id,
+        room_name: booking.room_types?.name || 'Unknown Room',
+        room_slug: booking.room_types?.slug || '',
+        check_in_date: booking.check_in_date,
+        check_out_date: booking.check_out_date,
+        adults: booking.guest_count || 1,
+        children: 0, // Default if not available
+        first_name: booking.guest_name?.split(' ')[0] || '',
+        last_name: booking.guest_name?.split(' ')[1] || '',
+        email: booking.guest_email,
+        special_requests: booking.special_requests || '',
+        total_price: booking.total_price,
+        status: booking.status,
+        booking_date: booking.created_at,
+        room_image: booking.room_images?.[0]?.image_url || null
+      }));
 
-      return sendSuccessResponse(res, bookings);
+      return res.status(200).json({
+        success: true,
+        data: formattedBookings
+      });
     }
 
     // GET - Retrieve bookings for an email
@@ -81,43 +136,70 @@ export default async (req, res) => {
       const { email } = req.query;
 
       if (!email) {
-        return sendErrorResponse(res, 'Email parameter is required', 400);
+        return res.status(400).json({
+          success: false,
+          error: 'Email parameter is required'
+        });
       }
 
-      const bookings = await db.all(`
-        SELECT 
-          b.id,
-          b.booking_reference,
-          b.room_type_id,
-          rt.name AS room_name,
-          rt.slug AS room_slug,
-          b.check_in_date,
-          b.check_out_date,
-          b.adults,
-          b.children,
-          b.first_name,
-          b.last_name,
-          b.email,
-          b.phone,
-          b.special_requests,
-          b.payment_method,
-          b.total_price,
-          b.status,
-          b.booking_date,
-          b.cancelled_date,
-          (SELECT image_url FROM room_images WHERE room_type_id = b.room_type_id ORDER BY display_order ASC LIMIT 1) AS room_image
-        FROM bookings b
-        JOIN room_types rt ON b.room_type_id = rt.id
-        WHERE b.email = ?
-        ORDER BY b.booking_date DESC
-      `, [email]);
+      // Get bookings for this email
+      const bookings = await selectData('bookings', {
+        select: `
+          id,
+          reference,
+          room_type_id,
+          check_in_date,
+          check_out_date,
+          guest_count,
+          guest_name,
+          guest_email,
+          special_requests,
+          total_price,
+          status,
+          created_at,
+          updated_at,
+          room_types (
+            id, 
+            name,
+            slug
+          ),
+          room_images (
+            image_url
+          )
+        `,
+        filters: { guest_email: email }
+      });
+      
+      // Format the bookings data
+      const formattedBookings = bookings.map(booking => ({
+        id: booking.id,
+        booking_reference: booking.reference,
+        room_type_id: booking.room_type_id,
+        room_name: booking.room_types?.name || 'Unknown Room',
+        room_slug: booking.room_types?.slug || '',
+        check_in_date: booking.check_in_date,
+        check_out_date: booking.check_out_date,
+        adults: booking.guest_count || 1,
+        children: 0, // Default if not available
+        first_name: booking.guest_name?.split(' ')[0] || '',
+        last_name: booking.guest_name?.split(' ')[1] || '',
+        email: booking.guest_email,
+        special_requests: booking.special_requests || '',
+        total_price: booking.total_price,
+        status: booking.status,
+        booking_date: booking.created_at,
+        room_image: booking.room_images?.[0]?.image_url || null
+      }));
 
-      return sendSuccessResponse(res, bookings);
+      return res.status(200).json({
+        success: true,
+        data: formattedBookings
+      });
     }
 
     // POST - Create a new booking
     if (req.method === 'POST' && !path) {
-      const body = parseBody(req);
+      const body = req.body;
 
       // Validate required fields
       const requiredFields = [
@@ -129,150 +211,116 @@ export default async (req, res) => {
         'lastName',
         'email',
         'phone',
-        'paymentMethod',
         'totalPrice'
       ];
 
-      const validation = validateRequiredFields(body, requiredFields);
-      if (!validation.valid) {
-        return sendErrorResponse(res, validation.message, 400);
+      // Check for missing fields
+      const missingFields = requiredFields.filter(field => !body[field]);
+      if (missingFields.length > 0) {
+        return res.status(400).json({
+          success: false,
+          error: `Missing required fields: ${missingFields.join(', ')}`
+        });
       }
 
       // Get user ID from authentication token (if present)
       let userId = null;
-      if (req.headers.authorization) {
-        const user = await getUserFromToken(req, db);
+      try {
+        const user = await getCurrentUser();
         if (user) {
           userId = user.id;
         }
-      }
-
-      // If user provided username/password but not authenticated, check if we should create an account
-      if (!userId && body.username && body.password) {
-        // Check if email already exists in users table
-        const existingUser = await db.get(
-          'SELECT id FROM users WHERE email = ? OR username = ?',
-          [body.email, body.username]
-        );
-
-        if (existingUser) {
-          return sendErrorResponse(res, 'Email or username already registered. Please login first.', 409);
-        }
-
-        // Create a new user
-        const crypto = await import('crypto');
-        
-        // Generate salt and hash for password
-        const salt = crypto.randomBytes(16).toString('hex');
-        const hash = crypto.pbkdf2Sync(body.password, salt, 1000, 64, 'sha512').toString('hex');
-        
-        // Insert the new user
-        const userResult = await db.run(
-          'INSERT INTO users (email, username, password_hash, salt) VALUES (?, ?, ?, ?)',
-          [body.email, body.username, hash, salt]
-        );
-        
-        userId = userResult.lastID;
+      } catch (error) {
+        console.log('No authenticated user');
       }
 
       // Verify the room type exists
-      const roomType = await db.get(
-        'SELECT id FROM room_types WHERE id = ?',
-        [body.roomTypeId]
-      );
+      const roomTypes = await selectData('room_types', {
+        select: 'id',
+        filters: { id: parseInt(body.roomTypeId) }
+      });
 
-      if (!roomType) {
-        return sendErrorResponse(res, 'Room type not found', 404);
+      if (!roomTypes || roomTypes.length === 0) {
+        return res.status(404).json({
+          success: false,
+          error: 'Room type not found'
+        });
       }
 
       // Check if room is available for the requested dates
       const available = await isRoomAvailable(
-        db,
-        body.roomTypeId,
+        parseInt(body.roomTypeId),
         body.checkInDate,
         body.checkOutDate
       );
 
       if (!available) {
-        return sendErrorResponse(
-          res,
-          'Room is not available for the selected dates',
-          409
-        );
+        return res.status(409).json({
+          success: false,
+          error: 'Room is not available for the selected dates'
+        });
       }
 
       // Generate a unique booking reference
       const bookingReference = generateBookingReference();
 
-      // Format dates for SQLite
-      const formattedCheckIn = formatDateForDb(body.checkInDate);
-      const formattedCheckOut = formatDateForDb(body.checkOutDate);
+      // Create the booking data object
+      const bookingData = {
+        reference: bookingReference,
+        room_type_id: parseInt(body.roomTypeId),
+        check_in_date: body.checkInDate,
+        check_out_date: body.checkOutDate,
+        guest_count: parseInt(body.adults) + (parseInt(body.children) || 0),
+        guest_name: `${body.firstName} ${body.lastName}`,
+        guest_email: body.email,
+        special_requests: body.specialRequests || '',
+        total_price: parseFloat(body.totalPrice),
+        status: 'confirmed',
+        user_id: userId
+      };
 
       // Insert the booking
-      await db.run(`
-        INSERT INTO bookings (
-          booking_reference,
-          room_type_id,
-          check_in_date,
-          check_out_date,
-          adults,
-          children,
-          first_name,
-          last_name,
-          email,
-          phone,
-          special_requests,
-          payment_method,
-          total_price,
-          status,
-          user_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `, [
-        bookingReference,
-        body.roomTypeId,
-        formattedCheckIn,
-        formattedCheckOut,
-        body.adults,
-        body.children || 0,
-        body.firstName,
-        body.lastName,
-        body.email,
-        body.phone,
-        body.specialRequests || '',
-        body.paymentMethod,
-        body.totalPrice,
-        'confirmed',
-        userId
-      ]);
+      const newBooking = await insertData('bookings', bookingData);
 
-      // Get the created booking
-      const booking = await db.get(`
-        SELECT 
-          b.id,
-          b.booking_reference,
-          b.room_type_id,
-          rt.name AS room_name,
-          rt.slug AS room_slug,
-          b.check_in_date,
-          b.check_out_date,
-          b.adults,
-          b.children,
-          b.first_name,
-          b.last_name,
-          b.email,
-          b.phone,
-          b.special_requests,
-          b.payment_method,
-          b.total_price,
-          b.status,
-          b.booking_date,
-          b.user_id
-        FROM bookings b
-        JOIN room_types rt ON b.room_type_id = rt.id
-        WHERE b.booking_reference = ?
-      `, [bookingReference]);
+      if (!newBooking || newBooking.length === 0) {
+        return res.status(500).json({
+          success: false,
+          error: 'Failed to create booking'
+        });
+      }
 
-      return sendSuccessResponse(res, booking, 201);
+      // Get the room details to include in the response
+      const roomType = await selectData('room_types', {
+        select: 'name, slug',
+        filters: { id: parseInt(body.roomTypeId) }
+      });
+
+      // Format the response booking object
+      const booking = {
+        id: newBooking[0].id,
+        booking_reference: bookingReference,
+        room_type_id: parseInt(body.roomTypeId),
+        room_name: roomType[0]?.name || 'Unknown Room',
+        room_slug: roomType[0]?.slug || '',
+        check_in_date: body.checkInDate,
+        check_out_date: body.checkOutDate,
+        adults: parseInt(body.adults),
+        children: parseInt(body.children) || 0,
+        first_name: body.firstName,
+        last_name: body.lastName,
+        email: body.email,
+        phone: body.phone,
+        special_requests: body.specialRequests || '',
+        total_price: parseFloat(body.totalPrice),
+        status: 'confirmed',
+        booking_date: newBooking[0].created_at,
+        user_id: userId
+      };
+
+      return res.status(201).json({
+        success: true,
+        data: booking
+      });
     }
 
     // Method not allowed or route not found
@@ -281,6 +329,12 @@ export default async (req, res) => {
       error: 'Route not found'
     });
   } catch (error) {
-    return handleError(res, error);
+    console.error('Error handling bookings:', error);
+    
+    return res.status(500).json({
+      success: false,
+      error: 'Internal server error',
+      detail: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };

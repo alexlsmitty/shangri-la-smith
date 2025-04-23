@@ -9,10 +9,35 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-    assetsInlineLimit: 0, // Don't inline any assets as data URLs
+    assetsInlineLimit: 4096, // Default size for inlining small assets (4kb)
+    chunkSizeWarningLimit: 1000, // Increase warning limit
+    sourcemap: false, // Disable sourcemaps in production
+    minify: 'terser', // Use terser for better minification
+    terserOptions: {
+      compress: {
+        drop_console: true, // Remove console logs in production
+        drop_debugger: true
+      }
+    },
     rollupOptions: {
       output: {
-        manualChunks: undefined
+        manualChunks: (id) => {
+          // Group node_modules code into a vendor chunk
+          if (id.includes('node_modules')) {
+            return 'vendor'
+          }
+          // Group Vuetify components together
+          if (id.includes('vuetify')) {
+            return 'ui-framework'
+          }
+        },
+        // Ensure CSS is extracted
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name.endsWith('.css')) {
+            return 'assets/styles/[name]-[hash][extname]'
+          }
+          return 'assets/[name]-[hash][extname]'
+        }
       }
     }
   },

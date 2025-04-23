@@ -1,76 +1,91 @@
-import { getDb, initDb } from './_utils/db.js';
-import { handleError, setCorsHeaders, sendSuccessResponse, sendErrorResponse } from './_utils/middleware.js';
+import { selectData } from '../lib/supabase.js';
 
 /**
  * GET /api/room?slug=room-slug
  * Get detailed information about a specific room type
  */
 export default async (req, res) => {
-  // Set CORS headers
-  setCorsHeaders(req, res);
-  
-  // Initialize database in production environment
-  if (process.env.NODE_ENV === 'production') {
-    await initDb();
-  }
-
   try {
     // Get room slug from query params
     const { slug } = req.query;
 
     if (!slug) {
-      return sendErrorResponse(res, 'Room slug is required', 400);
+      return res.status(400).json({
+        success: false,
+        error: 'Room slug is required'
+      });
     }
 
-    // Connect to the database
-    const db = await getDb();
-
-    // Get the room type
-    const room = await db.get(`
-      SELECT 
+    // Query the room from Supabase
+    const rooms = await selectData('room_types', {
+      select: `
         id, 
         name, 
         slug, 
         description,
-        full_description, 
-        price_per_night, 
-        size_sqm, 
-        size_sqft, 
-        bed_type, 
+        price_per_night,
         max_occupancy, 
-        view_type
-      FROM room_types
-      WHERE slug = ?
-    `, [slug]);
+        bedding_config,
+        room_size,
+        view_type,
+        is_accessible,
+        amenities,
+        room_images (
+          id,
+          image_url,
+          alt_text,
+          is_primary,
+          sort_order
+        )
+      `,
+      filters: { slug }
+    });
 
-    if (!room) {
-      return sendErrorResponse(res, 'Room not found', 404);
+    // Check if room exists
+    if (!rooms || rooms.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Room not found'
+      });
     }
 
-    // Get amenities
-    const amenities = await db.all(`
-      SELECT amenity 
-      FROM room_amenities 
-      WHERE room_type_id = ?
-    `, [room.id]);
+    const room = rooms[0];
+    
+    // Format images
+    const images = room.room_images || [];
+    
+    // Sort images by sort_order if available
+    const sortedImages = [...images].sort((a, b) => 
+      (a.sort_order || 0) - (b.sort_order || 0)
+    );
 
-    // Get images
-    const images = await db.all(`
-      SELECT image_url 
-      FROM room_images 
-      WHERE room_type_id = ? 
-      ORDER BY display_order ASC
-    `, [room.id]);
-
-    // Combine everything and return
+    // Organize the response object
     const roomDetails = {
-      ...room,
-      amenities: amenities.map(a => a.amenity),
-      images: images.map(img => img.image_url)
+      id: room.id,
+      name: room.name,
+      slug: room.slug,
+      description: room.description,
+      price_per_night: room.price_per_night,
+      max_occupancy: room.max_occupancy || 2,
+      bedding_config: room.bedding_config || 'King Bed',
+      room_size: room.room_size || 400,
+      view_type: room.view_type || 'Ocean View',
+      is_accessible: room.is_accessible || false,
+      amenities: room.amenities || [],
+      images: sortedImages.map(img => img.image_url)
     };
 
-    return sendSuccessResponse(res, roomDetails);
+    return res.status(200).json({
+      success: true,
+      data: roomDetails
+    });
   } catch (error) {
-    return handleError(res, error);
+    console.error('Error fetching room details:', error);
+    
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to fetch room details',
+      detail: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };

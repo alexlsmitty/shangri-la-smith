@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import axios from 'axios'
 
 const weatherData = ref(null)
 const loading = ref(true)
@@ -42,16 +43,21 @@ const getWeatherDescription = (code, description) => {
 
 // Fetch weather data for Cancun
 const fetchWeatherData = async () => {
-  // For demo purposes in development: simulate API response for Cancun
   try {
     loading.value = true
     
-    // In production, you'd use something like:
-    // const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY
-    // const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=Cancun,mx&units=metric&appid=${apiKey}`)
+    // Try to get the API key from environment variables
+    const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY
     
-    // For development, we'll simulate a response
-    setTimeout(() => {
+    if (apiKey) {
+      // Use the actual OpenWeather API if API key is available
+      const response = await axios.get(
+        `https://api.openweathermap.org/data/2.5/weather?q=Cancun,mx&units=metric&appid=${apiKey}`
+      )
+      weatherData.value = response.data
+    } else {
+      // Fallback to simulated data if no API key is available
+      console.warn('No OpenWeather API key found. Using simulated weather data.')
       // Simulated response for Cancun weather
       weatherData.value = {
         main: {
@@ -68,8 +74,9 @@ const fetchWeatherData = async () => {
         ],
         name: 'Cancun'
       }
-      loading.value = false
-    }, 500)
+    }
+    
+    loading.value = false
   } catch (err) {
     console.error('Error fetching weather data:', err)
     error.value = 'Unable to load weather data'

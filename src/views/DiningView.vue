@@ -2,6 +2,13 @@
 import { ref, onMounted } from 'vue'
 import { useIntersectionObserver } from '@vueuse/core'
 
+// Import images
+import heroBgImage from '@/assets/images/general/cooking.webp'
+import import1 from '@/assets/images/general/beachpool.webp'
+import import2 from '@/assets/images/general/beachpool2.webp'
+import import3 from '@/assets/images/general/islandhopping.webp'
+import import4 from '@/assets/images/general/culturaldance.webp'
+
 // Restaurant data with detailed information
 const restaurants = ref([
   {
@@ -14,7 +21,7 @@ const restaurants = ref([
     ambiance: 'Elegant, Romantic, Oceanfront',
     dressCode: 'Smart Casual',
     reservations: 'Recommended',
-    image: '@/assets/images/general/pexels-asadphoto-1268869.webp',
+    image: import1,
     hours: '6:00 PM - 10:00 PM',
     specialties: ['Grilled Mahi-Mahi', 'Lobster Risotto', 'Pan-Seared Scallops', 'Surf & Turf'],
     expanded: false
@@ -29,7 +36,7 @@ const restaurants = ref([
     ambiance: 'Relaxed, Beachfront, Informal',
     dressCode: 'Casual',
     reservations: 'Not Required',
-    image: '@/assets/images/general/pexels-asadphoto-1268871.webp',
+    image: import2,
     hours: '11:00 AM - 9:00 PM',
     specialties: ['Fish Tacos', 'Grilled Catch of the Day', 'Beach Burger', 'Tropical Cocktails'],
     expanded: false
@@ -44,7 +51,7 @@ const restaurants = ref([
     ambiance: 'Relaxed, Poolside, Informal',
     dressCode: 'Casual',
     reservations: 'Not Required',
-    image: '@/assets/images/general/pexels-maahidphotos-16604579.webp',
+    image: import3,
     hours: '9:00 AM - 6:00 PM',
     specialties: ['Fresh Fruit Smoothies', 'Club Sandwich', 'Ceviche', 'Tropical Salads'],
     expanded: false
@@ -59,7 +66,7 @@ const restaurants = ref([
     ambiance: 'Sophisticated, Relaxed, Live Music (select evenings)',
     dressCode: 'Smart Casual',
     reservations: 'Not Required',
-    image: '@/assets/images/general/pexels-kindelmedia-8826348.webp',
+    image: import4,
     hours: '4:00 PM - 12:00 AM',
     specialties: ['Signature Cocktails', 'Tapas', 'Charcuterie Board', 'Fine Whiskeys'],
     expanded: false
@@ -354,12 +361,13 @@ onMounted(() => {
         <v-card-text>
           <v-list>
             <v-list-item v-for="(item, index) in menuItems" :key="index" class="mb-4">
-              <v-list-item-header>
-                <v-list-item-title class="text-h6 d-flex justify-space-between">
-                  <span>{{ item.name }}</span>
-                  <span class="text-primary">${{ item.price }}</span>
-                </v-list-item-title>
-              </v-list-item-header>
+              <template v-slot:prepend>
+                <v-icon color="primary" class="mr-2">mdi-silverware-variant</v-icon>
+              </template>
+              <v-list-item-title class="text-h6 d-flex justify-space-between">
+                <span>{{ item.name }}</span>
+                <span class="text-primary">${{ item.price }}</span>
+              </v-list-item-title>
               <v-list-item-subtitle class="text-body-2 mt-1">
                 {{ item.description }}
               </v-list-item-subtitle>
@@ -388,7 +396,7 @@ onMounted(() => {
 .dining-hero-bg {
   height: 100%;
   width: 100%;
-  background-image: url('@/assets/images/general/pexels-jeffibera-1320761.webp');
+  background-image: url('@/assets/images/general/cooking.webp');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

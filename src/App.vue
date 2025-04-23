@@ -54,23 +54,24 @@ const handleFallbackDismiss = () => {
 </template>
 
 <style>
-/* Global styles */
+/* Global styles - using the variables defined in main.css */
 :root {
-  --primary-color: #00695c; /* Teal-based color for primary */
-  --secondary-color: #ffa000; /* Amber/gold for secondary */
-  --accent-color: #ff7043; /* Coral-like accent */
-  --text-color: #37474f; /* Dark blue-grey for text */
+  /* These are redundant and kept for backward compatibility */
+  --primary-color: var(--shangri-la-teal); 
+  --secondary-color: var(--shangri-la-coral);
+  --accent-color: var(--shangri-la-gold);
+  --text-color: var(--shangri-la-deep-blue);
   --light-text: #f9f9f9; /* Off-white for light text */
-  --dark-bg: #004d40; /* Darker teal for backgrounds */
-  --light-bg: #f5f5f5; /* Off-white background */
-  --success-color: #4caf50; /* Green for success messages */
-  --error-color: #f44336; /* Red for errors */
+  --dark-bg: var(--shangri-la-teal-dark);
+  --light-bg: var(--shangri-la-bg-light);
+  --success-color: var(--shangri-la-success);
+  --error-color: var(--shangri-la-error);
   --info-color: #2196f3; /* Blue for information */
-  --warning-color: #ff9800; /* Orange for warnings */
+  --warning-color: var(--shangri-la-warning);
 }
 
 body {
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--shangri-la-body-font);
   color: var(--text-color);
   background-color: var(--light-bg);
   line-height: 1.6;
@@ -80,7 +81,7 @@ body {
 }
 
 .v-application {
-  font-family: 'Montserrat', sans-serif !important;
+  font-family: var(--shangri-la-body-font) !important;
 }
 
 /* Ensure Vuetify app bar takes full width */
@@ -91,16 +92,16 @@ body {
 
 /* Add custom styles for theme consistency */
 .primary {
-  background-color: var(--primary-color) !important;
+  background-color: var(--shangri-la-teal) !important;
   color: white !important;
 }
 
 .secondary {
-  background-color: var(--secondary-color) !important;
+  background-color: var(--shangri-la-coral) !important;
 }
 
 .accent {
-  background-color: var(--accent-color) !important;
+  background-color: var(--shangri-la-gold) !important;
 }
 
 /* Typography */

@@ -1,7 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { SpaService, AuthService } from '@/services/api';
-import BookingAuthForm from '@/components/auth/BookingAuthForm.vue';
+import { ref, computed } from 'vue';
 
 const props = defineProps({
   service: {
@@ -10,7 +8,7 @@ const props = defineProps({
   }
 });
 
-defineEmits(['booking-completed', 'close']);
+const emit = defineEmits(['booking-completed', 'close']);
 
 // Form data
 const form = ref({
@@ -20,9 +18,7 @@ const form = ref({
   email: '',
   phone: '',
   specialRequests: '',
-  createAccount: true,
-  username: '',
-  password: ''
+  createAccount: false
 });
 
 // Form validation rules
@@ -41,41 +37,54 @@ const rules = {
 // Booking status and feedback
 const loading = ref(false);
 const error = ref(null);
-const authError = ref(null);
 const bookingComplete = ref(false);
-const bookingReference = ref('');
-const isLoggedIn = ref(AuthService.isLoggedIn());
+const bookingReference = ref('SB-' + Math.floor(Math.random() * 10000));
 
-// Available time slots
+// Available time slots (will be populated based on date selection)
 const availableTimeSlots = ref([]);
-const loadingTimeSlots = ref(false);
 
-// Fetch available time slots when date changes
-async function fetchTimeSlots() {
-  if (!form.value.date) return;
-  
-  loadingTimeSlots.value = true;
+// Function to get available time slots for a specific date
+async function getAvailableTimeSlots(date) {
   try {
-    const response = await SpaService.getAvailableTimeSlots(form.value.date, props.service.id);
-    availableTimeSlots.value = response.availableSlots;
+    const { selectData } = await import('@/lib/supabase');
+    
+    // Get all booked appointments for this date
+    const bookedAppointments = await selectData('spa_appointments', {
+      select: 'appointment_time',
+      filters: {
+        appointment_date: date,
+        service_id: props.service.id
+      }
+    });
+    
+    // Generate all possible time slots (9 AM - 5 PM)
+    const allTimeSlots = generateTimeSlots(9, 17);
+    
+    // Filter out booked slots
+    const bookedTimes = bookedAppointments.map(a => a.appointment_time);
+    return allTimeSlots.filter(time => !bookedTimes.includes(time));
   } catch (err) {
-    console.error('Error fetching time slots:', err);
-    error.value = 'Failed to load available time slots. Please try again.';
-  } finally {
-    loadingTimeSlots.value = false;
+    console.error('Error getting available time slots:', err);
+    // Return a default set of time slots if there's an error
+    return ['9:00 AM', '10:00 AM', '11:00 AM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM'];
   }
 }
 
-// Watch for date changes to update available time slots
-function onDateChange() {
-  form.value.time = ''; // Reset selected time
-  fetchTimeSlots();
-}
-
-// Handle authentication data updates from child component
-function handleAuthData(authData) {
-  form.value.username = authData.username;
-  form.value.password = authData.password;
+// Generate time slots for a given range
+function generateTimeSlots(startHour, endHour) {
+  const slots = [];
+  
+  for (let hour = startHour; hour <= endHour; hour++) {
+    const amPm = hour < 12 ? 'AM' : 'PM';
+    const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour);
+    
+    slots.push(`${displayHour}:00 ${amPm}`);
+    if (hour < endHour) {
+      slots.push(`${displayHour}:30 ${amPm}`);
+    }
+  }
+  
+  return slots;
 }
 
 // Computed property to check if form is valid
@@ -100,60 +109,42 @@ async function submitBooking() {
   
   loading.value = true;
   error.value = null;
-  authError.value = null;
   
   try {
-    // Handle authentication first if user wants to create an account
-    if (form.value.createAccount && form.value.username && form.value.password) {
-      try {
-        if (isLoggedIn.value) {
-          // User is already logged in
-          await AuthService.getCurrentUser();
-        } else {
-          // Register new user
-          const authData = await AuthService.register({
-            email: form.value.email,
-            username: form.value.username,
-            password: form.value.password
-          });
-          
-          // Save auth token
-          AuthService.setAuthToken(authData.token);
-          isLoggedIn.value = true;
-        }
-      } catch (authErr) {
-        console.error('Authentication error:', authErr);
-        authError.value = authErr.response?.data?.error || 'An error occurred during authentication';
-        // Continue with booking without linking to account
-      }
-    }
-    
-    // Create appointment data object
+    // Create the appointment data object
     const appointmentData = {
       serviceId: props.service.id,
-      appointmentDate: form.value.date,
-      appointmentTime: form.value.time,
+      date: form.value.date,
+      time: form.value.time,
       guestName: form.value.name,
       guestEmail: form.value.email,
-      guestPhone: form.value.phone,
-      specialRequests: form.value.specialRequests
+      phone: form.value.phone,
+      notes: form.value.specialRequests
     };
     
-    // Add auth data if creating account
-    if (form.value.createAccount && form.value.username && form.value.password) {
-      appointmentData.username = form.value.username;
-      appointmentData.password = form.value.password;
-    }
+    // Import the Supabase functions
+    const { insertData } = await import('@/lib/supabase');
     
-    // Book the appointment
-    const response = await SpaService.bookAppointment(appointmentData);
+    // Insert the appointment into the database
+    const result = await insertData('spa_appointments', {
+      service_id: appointmentData.serviceId,
+      guest_name: appointmentData.guestName,
+      guest_email: appointmentData.guestEmail,
+      appointment_date: appointmentData.date,
+      appointment_time: appointmentData.time,
+      status: 'confirmed',
+      reference: 'SPA-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000)
+    });
     
     // Set booking reference for confirmation display
-    bookingReference.value = response.appointment.booking_reference;
+    bookingReference.value = result[0].reference;
     bookingComplete.value = true;
+    
+    // Emit completion event
+    emit('booking-completed');
   } catch (err) {
     console.error('Error booking appointment:', err);
-    error.value = err.response?.data?.error || 'An unexpected error occurred while processing your booking.';
+    error.value = 'An unexpected error occurred while processing your booking.';
   } finally {
     loading.value = false;
   }
@@ -162,14 +153,17 @@ async function submitBooking() {
 // Get today's date in YYYY-MM-DD format for min date
 const today = new Date().toISOString().split('T')[0];
 
-onMounted(() => {
-  // Check authentication status
-  isLoggedIn.value = AuthService.isLoggedIn();
-});
+// Function to update available time slots when date changes
+async function updateAvailableTimeSlots() {
+  if (form.value.date) {
+    form.value.time = ''; // Reset the selected time
+    availableTimeSlots.value = await getAvailableTimeSlots(form.value.date);
+  }
+}
 </script>
 
 <template>
-  <div class="spa-booking-form">
+  <v-card>
     <v-card-title class="d-flex justify-space-between align-center pb-2">
       <span class="text-h5 font-weight-bold">{{ bookingComplete ? 'Booking Confirmed!' : 'Book Your Appointment' }}</span>
       <v-btn icon variant="text" @click="$emit('close')">
@@ -182,9 +176,6 @@ onMounted(() => {
     <!-- Booking confirmation display -->
     <div v-if="bookingComplete" class="pa-4">
       <v-alert type="success" variant="tonal" class="mb-4">
-        <div class="confirmation-icon-container mb-3 d-flex justify-center">
-          <v-icon color="success" size="64">mdi-check-circle</v-icon>
-        </div>
         <h3 class="text-h6 text-center mb-2">Thank You for Your Booking!</h3>
         <p class="text-body-1 text-center mb-2">Your appointment has been confirmed.</p>
         <p class="text-body-2 text-center mb-2">Booking reference: <strong>{{ bookingReference }}</strong></p>
@@ -222,15 +213,6 @@ onMounted(() => {
       </v-card>
       
       <div class="text-center">
-        <v-btn
-          color="primary"
-          class="ma-2"
-          to="/my-account"
-          v-if="isLoggedIn"
-        >
-          View My Appointments
-        </v-btn>
-        
         <v-btn
           color="secondary"
           variant="outlined"
@@ -270,15 +252,15 @@ onMounted(() => {
       <v-row>
         <v-col cols="12" sm="6">
           <v-text-field
-            v-model="form.date"
-            label="Date"
-            type="date"
-            :min="today"
-            variant="outlined"
-            :rules="[rules.required]"
-            required
-            @update:model-value="onDateChange"
-          ></v-text-field>
+          v-model="form.date"
+          label="Date"
+          type="date"
+          :min="today"
+          variant="outlined"
+          :rules="[rules.required]"
+          required
+            @update:model-value="updateAvailableTimeSlots"
+        ></v-text-field>
         </v-col>
         <v-col cols="12" sm="6">
           <v-select
@@ -287,8 +269,7 @@ onMounted(() => {
             :items="availableTimeSlots"
             variant="outlined"
             :rules="[rules.required]"
-            :loading="loadingTimeSlots"
-            :disabled="loadingTimeSlots || !form.date || availableTimeSlots.length === 0"
+            :disabled="!form.date"
             no-data-text="Please select a date first"
             required
           ></v-select>
@@ -339,44 +320,6 @@ onMounted(() => {
         rows="3"
       ></v-textarea>
       
-      <!-- Authentication Section -->
-      <v-divider class="my-4"></v-divider>
-      
-      <h3 class="text-subtitle-1 font-weight-bold mb-3">Account Information</h3>
-      
-      <div v-if="authError" class="mb-4">
-        <v-alert type="error" variant="tonal" closable>
-          {{ authError }}
-        </v-alert>
-      </div>
-      
-      <v-card v-if="isLoggedIn" variant="outlined" class="mb-4 pa-4">
-        <div class="d-flex align-center mb-2">
-          <v-icon color="success" class="mr-2">mdi-check-circle</v-icon>
-          <span class="text-body-1 font-weight-medium">You are logged in</span>
-        </div>
-        <p class="text-body-2">
-          Your appointment will be linked to your account automatically, allowing you to manage it later.
-        </p>
-      </v-card>
-      
-      <template v-else>
-        <v-switch
-          v-model="form.createAccount"
-          color="primary"
-          label="Create an account to manage your appointment"
-          hide-details
-          class="mb-4"
-        ></v-switch>
-        
-        <BookingAuthForm 
-          v-if="form.createAccount"
-          :email="form.email" 
-          :show-register="true"
-          @auth-data-updated="handleAuthData"
-        />
-      </template>
-      
       <!-- Submit button -->
       <v-btn
         color="primary"
@@ -390,14 +333,10 @@ onMounted(() => {
         Confirm Booking
       </v-btn>
     </v-form>
-  </div>
+  </v-card>
 </template>
 
 <style scoped>
-.spa-booking-form {
-  max-width: 100%;
-}
-
 .confirmation-icon-container {
   margin-top: 1rem;
 }

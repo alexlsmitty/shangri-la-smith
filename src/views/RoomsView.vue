@@ -4,6 +4,9 @@ import BookingForm from '@/components/booking/BookingForm.vue';
 import SpecialOfferBanner from '@/components/booking/SpecialOfferBanner.vue';
 import { ref } from 'vue';
 
+// Import hero image
+import heroImage from '@/assets/images/general/nicebeach.webp';
+
 // Room data
 const rooms = ref([
   {
@@ -127,7 +130,7 @@ function openBookingDialog(room) {
     <v-row class="mb-8">
       <v-col cols="12">
         <v-img
-          src="@/assets/images/general/pexels-jeffibera-1320761.webp"
+          :src="heroImage"
           height="300"
           class="rounded-lg"
           gradient="to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.7)"

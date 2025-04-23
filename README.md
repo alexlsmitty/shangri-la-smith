@@ -30,13 +30,14 @@ The Shangri-La Beach Resort website is a comprehensive platform showcasing the r
 
 ### Backend
 - **Express.js**: API server
-- **SQLite**: Database with dynamic initialization
+- **Supabase**: PostgreSQL database service with authentication
 - **Vercel Serverless Functions**: For deployment
 
 ## 📋 Prerequisites
 
 - Node.js 18.x or higher
 - npm or yarn
+- Supabase account (for database)
 
 ## 🔧 Installation & Setup
 
@@ -51,40 +52,61 @@ The Shangri-La Beach Resort website is a comprehensive platform showcasing the r
    npm install
    ```
 
-3. **Initialize the database**:
-   ```bash
-   npm run init-db
+3. **Set up environment variables**:
+   Create a `.env` file in the root directory with your Supabase credentials:
+   ```
+   SUPABASE_URL=your_supabase_project_url
+   SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
 
-4. **Start the development server**:
+4. **Initialize the database**:
+   Run the SQL schema in Supabase SQL Editor:
+   ```bash
+   # Copy the contents of supabase-schema.sql to the Supabase SQL Editor and run
+   ```
+
+5. **Start the development server**:
    ```bash
    npm run dev
    ```
 
 The application will be available at http://localhost:5173/
 
-## 🗃️ Database Structure
+## 📊 Database Setup
 
-The application uses SQLite with the following tables:
+### Supabase Configuration
+
+The application uses Supabase (PostgreSQL) for data storage. Follow these steps to set up your database:
+
+1. Create a Supabase account at [supabase.com](https://supabase.com)
+2. Create a new project
+3. In the SQL Editor, run the SQL script from `supabase-schema.sql`
+4. Copy your project URL and anon key to your `.env` file
+
+### Database Migration
+
+If you have existing data in SQLite that you want to migrate to Supabase:
+
+1. Make sure your SQLite database is initialized and populated
+2. Add your service role key to the `.env` file (for migration only)
+3. Run the migration script:
+   ```bash
+   node migrate-to-supabase.js
+   ```
+
+### Database Structure
+
+The application uses the following tables:
 
 - **room_types**: Details about each room type
-- **room_amenities**: Amenities associated with each room type
 - **room_images**: Images for each room type
+- **room_availability**: Availability and pricing for rooms
 - **bookings**: Room reservation information
 - **spa_categories**: Categories of spa services
 - **spa_services**: Detailed spa treatment information
 - **spa_appointments**: Spa booking records
-- **users**: User authentication and profile data
-
-### Database Location
-
-- Development: `./.data/shangri-la.db`
-- Production: Created in the Vercel temporary storage on each serverless function execution
-
-### Database Access
-
-- Direct access in development: Use SQLite tools to open `./.data/shangri-la.db`
-- API access: Use the provided API endpoints to interact with the database
+- **testimonial_categories**: Categories for testimonials
+- **testimonials**: Guest reviews and ratings
 
 ## 🖥️ API Endpoints
 
@@ -119,10 +141,10 @@ The application uses SQLite with the following tables:
 
 ```
 shangri-la-smith/
-├── .data/                # Database storage (development)
 ├── api/                  # API handlers
 ├── base-content/         # Content data
 ├── db/                   # Database schema and seed data
+├── lib/                  # Utility functions and Supabase client
 ├── public/               # Static assets
 ├── src/                  # Frontend source code
 │   ├── assets/           # Images, fonts, etc.
@@ -133,40 +155,118 @@ shangri-la-smith/
 │   ├── views/            # Page components
 │   ├── App.vue           # Main app component
 │   └── main.js           # App entry point
+├── .env                  # Environment variables (development)
 ├── .env.production       # Production environment variables
-├── init-db.js            # Database initialization script
+├── supabase-schema.sql   # Database schema for Supabase
+├── migrate-to-supabase.js# Database migration script
 ├── server.js             # Express API server
 └── vite.config.js        # Vite configuration
 ```
 
 ## 🚀 Deployment
 
-The project is configured for deployment on Vercel with serverless functions:
+The project is configured for deployment on both Vercel and GitHub Pages:
+
+### Vercel Deployment
 
 1. **Setup**:
    - Fork or push this repository to your GitHub account
-   - Create a Vercel account and import the GitHub repository
-   - Configure the build settings:
-     - Build Command: `npm run vercel-build`
+   - Create a Vercel account and connect to your GitHub repository
+   - Configure the build settings in Vercel dashboard:
+     - Build Command: `npm run build`
      - Output Directory: `dist`
      - Install Command: `npm install`
+   
+2. **Environment Variables**:
+   - Add the following environment variables in Vercel dashboard:
+     - `VITE_SUPABASE_URL`: Your Supabase project URL
+     - `VITE_SUPABASE_ANON_KEY`: Your Supabase anon key
+     - `VITE_OPENWEATHER_API_KEY`: Your OpenWeatherMap API key
 
-2. **How It Works**:
-   - Frontend static files are served from `/dist`
-   - API endpoints run as serverless functions
-   - SQLite database initializes on-demand in Vercel's temporary storage
-   - The `vercel.json` configuration routes requests appropriately
+3. **Deployment**:
+   - Vercel will automatically deploy when you push to the main branch
+   - You can also trigger manual deployments from the Vercel dashboard
+
+### GitHub Pages Deployment
+
+1. **Setup**:
+   - Ensure your repository is public and named appropriately
+   - Build your project: `npm run build`
+
+2. **GitHub Pages Configuration**:
+   - Go to your repository Settings > Pages
+   - Select the 'GitHub Actions' as the source
+   - Create a GitHub Actions workflow file in `.github/workflows/deploy.yml`:
+
+```yaml
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_OPENWEATHER_API_KEY: ${{ secrets.VITE_OPENWEATHER_API_KEY }}
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist
+```
+
+3. **Environment Variables**:
+   - Add repository secrets in Settings > Secrets and variables > Actions:
+     - `VITE_SUPABASE_URL`: Your Supabase project URL
+     - `VITE_SUPABASE_ANON_KEY`: Your Supabase anon key
+     - `VITE_OPENWEATHER_API_KEY`: Your OpenWeatherMap API key
+
+### Page Size Verification
+
+Before deploying, verify that each page meets the 1.8MB size limit:
+
+1. Build the project: `npm run build`
+2. Run the size checker: `npm run check-size`
+3. Fix any page size issues if flagged by the checker
+
+### How It Works
+
+- Frontend static files are served from `/dist`
+- API endpoints use Supabase direct connections for frontend
+- Images are optimized during build process
+- The site uses client-side routing with Vue Router
+- All pages are kept under 1.8MB as required
 
 ## 📄 Scripts
 
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
-- `npm run init-db` - Initialize the database
+- `npm run preview` - Preview production build locally
 - `npm run start` - Start the Express API server
-- `npm run vercel-build` - Build for Vercel deployment
-- `npm run check-deployment` - Test production build locally
+- `npm run check-size` - Check if pages meet the 1.8MB size limit
+- `npm run analyze` - Analyze bundle size with detailed reports
 - `npm run lint` - Lint and fix code issues
 - `npm run format` - Format code with Prettier
+- `npm run check-deployment` - Test production build locally
+- `npm run vercel-build` - Build specifically for Vercel deployment
 
 ## 🤝 Contributing
 
@@ -184,4 +284,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - Weather data provided by [OpenWeatherMap API](https://openweathermap.org/api)
 - Images sourced from Unsplash and Pexels (individual attribution in the site footer)
+- Database services provided by [Supabase](https://supabase.com)
 - Vue.js and Vuetify for the frontend framework

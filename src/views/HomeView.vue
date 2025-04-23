@@ -1,7 +1,35 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useIntersectionObserver } from '@vueuse/core'
+
+// Import background images
+import resortBgImage from '@/assets/images/resort-2495217_1920.webp'
+import beachAccessImage from '@/assets/images/general/beachpool.webp'
+import infinityPoolImage from '@/assets/images/general/beachpool2.webp'
+import spaImage from '@/assets/images/general/meditation.webp'
+import diningImage from '@/assets/images/general/cooking.webp'
+import room1Image from '@/assets/images/hotel-room1.webp'
+import room2Image from '@/assets/images/hotel-room2.webp'
+import room3Image from '@/assets/images/hotel-room3.webp'
+import activitiesBgImage from '@/assets/images/general/nicebeach.webp'
+import avatarImage from '@/assets/images/single.webp'
+import ctaBgImage from '@/assets/images/resort-drone.webp'
+
+// Create style object with background images
+const bgStyles = computed(() => ({
+  heroBg: { backgroundImage: `url(${resortBgImage})` },
+  beachImg: { backgroundImage: `url(${beachAccessImage})` },
+  poolImg: { backgroundImage: `url(${infinityPoolImage})` },
+  spaImg: { backgroundImage: `url(${spaImage})` },
+  diningImg: { backgroundImage: `url(${diningImage})` },
+  room1Img: { backgroundImage: `url(${room1Image})` },
+  room2Img: { backgroundImage: `url(${room2Image})` },
+  room3Img: { backgroundImage: `url(${room3Image})` },
+  activitiesImg: { backgroundImage: `url(${activitiesBgImage})` },
+  avatarImg: { backgroundImage: `url(${avatarImage})` },
+  ctaImg: { backgroundImage: `url(${ctaBgImage})` }
+}))
 
 const router = useRouter()
 
@@ -85,7 +113,7 @@ const testimonials = [
       <!-- Use a direct static image as background with inline style -->
       <div 
         class="hero-background" 
-        style="background-image: url('/images/resort-2495217_1920.webp');"
+        :style="bgStyles.heroBg"
       >
         <div class="hero-overlay d-flex flex-column justify-center align-center text-center">
           <div class="hero-content">
@@ -141,7 +169,7 @@ const testimonials = [
                 views.
               </v-card-text>
               <!-- Use direct path -->
-              <div class="feature-image private-beach-image"></div>
+              <div class="feature-image private-beach-image" :style="bgStyles.beachImg"></div>
             </v-card>
           </v-col>
 
@@ -162,7 +190,7 @@ const testimonials = [
                 sea.
               </v-card-text>
               <!-- Use direct path -->
-              <div class="feature-image infinity-pool-image"></div>
+              <div class="feature-image infinity-pool-image" :style="bgStyles.poolImg"></div>
             </v-card>
           </v-col>
 
@@ -183,7 +211,7 @@ const testimonials = [
                 traditions.
               </v-card-text>
               <!-- Use direct path -->
-              <div class="feature-image spa-image"></div>
+              <div class="feature-image spa-image" :style="bgStyles.spaImg"></div>
             </v-card>
           </v-col>
 
@@ -204,7 +232,7 @@ const testimonials = [
                 international flavors.
               </v-card-text>
               <!-- Use direct path -->
-              <div class="feature-image dining-image"></div>
+              <div class="feature-image dining-image" :style="bgStyles.diningImg"></div>
             </v-card>
           </v-col>
         </v-row>
@@ -229,7 +257,7 @@ const testimonials = [
               @click="gotoPage('/rooms')"
             >
               <div class="room-img-container">
-                <div class="room-image room-1"></div>
+                <div class="room-image room-1" :style="bgStyles.room1Img"></div>
                 <div class="room-overlay d-flex flex-column justify-end">
                   <div class="pa-4 text-white">
                     <h3 class="text-h5 font-weight-bold">Ocean View Deluxe Room</h3>
@@ -256,7 +284,7 @@ const testimonials = [
               @click="gotoPage('/rooms')"
             >
               <div class="room-img-container">
-                <div class="room-image room-2"></div>
+                <div class="room-image room-2" :style="bgStyles.room2Img"></div>
                 <div class="room-overlay d-flex flex-column justify-end">
                   <div class="pa-4 text-white">
                     <h3 class="text-h5 font-weight-bold">Beachfront Suite</h3>
@@ -283,7 +311,7 @@ const testimonials = [
               @click="gotoPage('/rooms')"
             >
               <div class="room-img-container">
-                <div class="room-image room-3"></div>
+                <div class="room-image room-3" :style="bgStyles.room3Img"></div>
                 <div class="room-overlay d-flex flex-column justify-end">
                   <div class="pa-4 text-white">
                     <h3 class="text-h5 font-weight-bold">Garden View Family Room</h3>
@@ -324,7 +352,7 @@ const testimonials = [
 
     <!-- Activities Section -->
     <section ref="activitiesSection" class="py-12 activities-section position-relative">
-      <div class="activities-background">
+      <div class="activities-background" :style="bgStyles.activitiesImg">
         <div class="activities-overlay d-flex align-center">
           <v-container>
             <v-row>
@@ -388,7 +416,7 @@ const testimonials = [
         <v-row>
           <v-col v-for="(testimonial, index) in testimonials" :key="index" cols="12" md="4">
             <v-card class="testimonial-card elevation-3 rounded-lg pa-6 h-100">
-              <div class="testimonial-avatar mb-4"></div>
+              <div class="testimonial-avatar mb-4" :style="bgStyles.avatarImg"></div>
               <div class="mb-4">
                 <v-rating
                   :model-value="testimonial.rating"
@@ -426,7 +454,7 @@ const testimonials = [
 
     <!-- Call to Action Section -->
     <section class="py-12 cta-section">
-      <div class="cta-background">
+      <div class="cta-background" :style="bgStyles.ctaImg">
         <div class="cta-overlay d-flex flex-column justify-center align-center text-center">
           <h2 class="text-h3 font-weight-bold mb-4 text-white">Ready to Experience Paradise?</h2>
           <p class="text-h6 mb-6 text-white max-width-text mx-auto">
@@ -543,29 +571,13 @@ const testimonials = [
   opacity: 1;
 }
 
-/* Feature images with direct paths */
+/* Feature images */
 .feature-image {
   height: 160px;
   width: 100%;
   background-size: cover;
   background-position: center;
   margin-top: 8px;
-}
-
-.private-beach-image {
-  background-image: url('/images/beach-access.webp');
-}
-
-.infinity-pool-image {
-  background-image: url('/images/infinity-pool.webp');
-}
-
-.spa-image {
-  background-image: url('/images/spa-treatment.webp');
-}
-
-.dining-image {
-  background-image: url('/images/fine-dining.webp');
 }
 
 /* Rooms Section */
@@ -601,15 +613,15 @@ const testimonials = [
 }
 
 .room-1 {
-  background-image: url('/images/ocean-view-room.webp');
+  /* Background now set via :style binding */
 }
 
 .room-2 {
-  background-image: url('/images/beachfront-suite.webp');
+  /* Background now set via :style binding */
 }
 
 .room-3 {
-  background-image: url('/images/garden-room.webp');
+  /* Background now set via :style binding */
 }
 
 .room-overlay {
@@ -645,7 +657,7 @@ const testimonials = [
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('/images/activities-bg.webp');
+  /* Background now set via :style binding */
   background-size: cover;
   background-position: center;
 }
@@ -687,7 +699,7 @@ const testimonials = [
   border-radius: 50%;
   background-color: var(--shangri-la-teal);
   margin: 0 auto;
-  background-image: url('/images/guest-avatar.webp');
+  /* Background now set via :style binding */
   background-size: cover;
   background-position: center;
 }
@@ -709,7 +721,7 @@ const testimonials = [
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('/images/resort-aerial.webp');
+  /* Background now set via :style binding */
   background-size: cover;
   background-position: center;
 }

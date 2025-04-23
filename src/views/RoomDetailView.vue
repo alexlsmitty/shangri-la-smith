@@ -3,6 +3,14 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import BookingForm from '@/components/booking/BookingForm.vue';
 
+// Import room images for similar rooms section
+import room1Image from '@/assets/images/hotel-room1.webp';
+import room2Image from '@/assets/images/hotel-room2.webp';
+import room3Image from '@/assets/images/hotel-room3.webp';
+
+// Create an array of similar room images
+const similarRoomImages = [room1Image, room2Image, room3Image];
+
 const route = useRoute();
 const router = useRouter();
 const roomType = computed(() => route.params.roomType);
@@ -420,7 +428,7 @@ function openBookingDialog() {
       <v-col cols="12" sm="6" lg="4" v-for="i in 3" :key="i">
         <v-card class="h-100" elevation="2">
           <v-img
-            :src="`@/assets/images/room-${i}.jpg`"
+            :src="similarRoomImages[i-1]"
             height="200"
             cover
           ></v-img>

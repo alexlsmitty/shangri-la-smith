@@ -3,6 +3,9 @@ import { ref, computed, onMounted } from 'vue'
 import { useIntersectionObserver } from '@vueuse/core'
 import testimonialService from '@/services/testimonialService'
 import SectionHeading from '@/components/SectionHeading.vue'
+import EmptyAvatar from '@/components/EmptyAvatar.vue'
+// Import the hero background image directly
+import heroBackgroundImage from '@/assets/images/resort-drone.webp'
 
 // Testimonials data from API
 const testimonials = ref([])
@@ -18,11 +21,13 @@ const sortOption = ref('newest')
 const page = ref(1)
 const itemsPerPage = 6
 
+// For fixed categories while we wait for API
+const fallbackCategories = ['all', 'Overall Experience', 'Accommodations', 'Dining', 'Spa Services', 'Family Experience', 'Activities', 'Special Occasions', 'Amenities']
+
 // For testimonial submission
 const showSubmissionForm = ref(false)
 const userRating = ref(5)
 const userName = ref('')
-const userEmail = ref('')
 const userLocation = ref('')
 const userCategory = ref('')
 const userComment = ref('')
@@ -68,7 +73,7 @@ const filteredTestimonials = computed(() => {
 
 // Featured testimonials
 const featuredTestimonials = computed(() => {
-  return testimonials.value.filter(t => t.featured === 1)
+  return testimonials.value.filter(t => t.featured === true)
 })
 
 // Paginated testimonials
@@ -94,14 +99,22 @@ const loadTestimonials = async () => {
     testimonials.value = data
     
     // Fetch categories
-    const categoryData = await testimonialService.getCategories()
-    categories.value = ['all', ...categoryData]
+    try {
+      const categoryData = await testimonialService.getCategoryNames()
+      categories.value = ['all', ...categoryData]
+    } catch (catError) {
+      console.warn('Error loading categories, using fallbacks:', catError)
+      categories.value = fallbackCategories
+    }
     
     isLoading.value = false
   } catch (error) {
     console.error('Error loading testimonials:', error)
     loadError.value = 'Failed to load testimonials. Please try again later.'
     isLoading.value = false
+    
+    // Set fallback categories when testimonials fail to load
+    categories.value = fallbackCategories
   }
 }
 
@@ -119,10 +132,9 @@ const submitTestimonial = async () => {
     isSubmitting.value = true
     submissionError.value = null
     
-    // Create testimonial object
+    // Create testimonial object based on the actual database schema
     const testimonialData = {
       name: userName.value,
-      email: userEmail.value,
       location: userLocation.value,
       category: userCategory.value,
       rating: userRating.value,
@@ -130,7 +142,8 @@ const submitTestimonial = async () => {
     }
     
     // Submit testimonial to API
-    await testimonialService.submitTestimonial(testimonialData)
+    const result = await testimonialService.submitTestimonial(testimonialData)
+    console.log('Testimonial submitted:', result)
     
     isSubmitting.value = false
     submissionSuccess.value = true
@@ -138,7 +151,6 @@ const submitTestimonial = async () => {
     // Reset form after submission
     setTimeout(() => {
       userName.value = ''
-      userEmail.value = ''
       userLocation.value = ''
       userCategory.value = ''
       userRating.value = 5
@@ -157,6 +169,49 @@ const submitTestimonial = async () => {
 onMounted(() => {
   // Load testimonials data
   loadTestimonials()
+
+  // Set up fallback testimonials if API fails
+  setTimeout(() => {
+    if (isLoading.value && testimonials.value.length === 0) {
+      console.log('Setting up fallback testimonials');
+      const fallbackTestimonials = [
+        {
+          id: 1,
+          name: "Sarah M.",
+          location: "New York, USA",
+          rating: 5,
+          text: "Our stay at Shangri La was absolutely perfect! The service was impeccable, the food was delicious, and the views were breathtaking. We especially loved relaxing by the infinity pool. We can't wait to return!",
+          category: "Overall Experience",
+          featured: true,
+          created_at: "2025-03-15T14:23:00.000Z"
+        },
+        {
+          id: 2,
+          name: "John B.",
+          location: "London, UK",
+          rating: 5,
+          text: "The beachfront suite was amazing! Waking up to the sound of the waves and stepping right onto the sand was incredible. The resort offered so many activities, we never had a dull moment. Highly recommend the snorkeling!",
+          category: "Accommodations",
+          featured: true,
+          created_at: "2025-03-10T09:45:00.000Z"
+        },
+        {
+          id: 3,
+          name: "Emily K.",
+          location: "Toronto, Canada",
+          rating: 5,
+          text: "We traveled with our two young children, and the Kids' Club was a lifesaver! The staff were fantastic, and our kids had a blast. This allowed us some much-needed relaxation time. The resort is very family-friendly.",
+          category: "Family Experience",
+          featured: true,
+          created_at: "2025-02-28T16:30:00.000Z"
+        }
+      ];
+      
+      testimonials.value = fallbackTestimonials;
+      isLoading.value = false;
+      loadError.value = null;
+    }
+  }, 3000); // Wait 3 seconds before showing fallbacks
   
   // Animation for hero section
   useIntersectionObserver(heroSection, ([{ isIntersecting }]) => {
@@ -285,7 +340,7 @@ onMounted(() => {
             >
               <div class="d-flex align-center mb-4">
                 <v-avatar size="60" class="me-4">
-                  <v-img :src="testimonial.image_url" cover></v-img>
+                  <EmptyAvatar :name="testimonial.name" :size="60" />
                 </v-avatar>
                 <div>
                   <div class="text-h6 font-weight-bold">{{ testimonial.name }}</div>
@@ -426,7 +481,7 @@ onMounted(() => {
             >
               <div class="d-flex align-center mb-3">
                 <v-avatar size="50" class="me-3">
-                  <v-img :src="testimonial.image_url" cover></v-img>
+                  <EmptyAvatar :name="testimonial.name" :size="50" />
                 </v-avatar>
                 <div>
                   <div class="text-subtitle-1 font-weight-bold">{{ testimonial.name }}</div>
@@ -565,20 +620,11 @@ onMounted(() => {
             </v-row>
             
             <v-row>
-              <v-col cols="12" sm="6">
+              <v-col cols="12">
                 <v-text-field
                   v-model="userName"
                   label="Your Name"
                   required
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field
-                  v-model="userEmail"
-                  label="Email Address"
-                  type="email"
-                  required
-                  hint="Your email will not be published"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -631,7 +677,7 @@ onMounted(() => {
                   class="px-8" 
                   type="submit"
                   :loading="isSubmitting"
-                  :disabled="!userName || !userEmail || !userLocation || !userCategory || !userComment"
+                  :disabled="!userName || !userLocation || !userCategory || !userComment"
                 >
                   Submit Review
                   <v-icon right class="ml-2">mdi-send</v-icon>
@@ -669,7 +715,7 @@ onMounted(() => {
 .testimonials-hero-bg {
   height: 100%;
   width: 100%;
-  background-image: url('/images/testimonials-hero.webp');
+  background-image: url('@/assets/images/resort-drone.webp');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;

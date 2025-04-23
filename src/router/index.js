@@ -3,6 +3,8 @@ import HomeView from '../views/HomeView.vue'
 import { AuthService } from '@/services/api'
 import NotFoundView from '../views/NotFoundView.vue'
 
+// Load other views lazily for better performance
+
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -14,61 +16,61 @@ const router = createRouter({
     {
       path: '/rooms',
       name: 'rooms',
-      component: NotFoundView,
+      component: () => import('../views/RoomsView.vue'),
     },
     {
       path: '/rooms/:roomType',
       name: 'room-details',
-      component: NotFoundView,
+      component: () => import('../views/RoomDetailView.vue'),
       props: true,
     },
     {
       path: '/spa',
       name: 'spa',
-      component: NotFoundView,
+      component: () => import('../views/SpaView.vue'),
     },
     {
       path: '/dining',
       name: 'dining',
-      component: NotFoundView,
+      component: () => import('../views/DiningView.vue'),
     },
     {
       path: '/activities',
       name: 'activities',
-      component: NotFoundView,
+      component: () => import('../views/ActivitiesView.vue'),
     },
     {
       path: '/testimonials',
       name: 'testimonials',
-      component: NotFoundView,
+      component: () => import('../views/TestimonialsView.vue'),
     },
     {
       path: '/bookings',
       name: 'bookings',
-      component: NotFoundView,
+      component: () => import('../views/BookingsView.vue'),
     },
     {
       path: '/login',
       name: 'login',
-      component: NotFoundView,
+      component: () => import('../views/LoginView.vue'),
       meta: { guestOnly: true }
     },
     {
       path: '/my-account',
       name: 'my-account',
-      component: NotFoundView,
+      component: () => import('../views/MyAccountView.vue'),
       meta: { requiresAuth: true }
     },
     {
       path: '/booking/:reference',
       name: 'booking-details',
-      component: NotFoundView,
+      component: () => import('../views/BookingDetailView.vue'),
       props: true
     },
     {
       path: '/spa/appointment/:reference',
       name: 'spa-appointment-details',
-      component: NotFoundView,
+      component: () => import('../views/SpaAppointmentDetailView.vue'),
       props: true
     },
     // Footer link routes that redirect to NotFound

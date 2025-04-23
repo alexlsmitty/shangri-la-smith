@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { BookingService, RoomService, AuthService } from '@/services/api';
-import BookingAuthForm from '@/components/auth/BookingAuthForm.vue';
+import { BookingService, RoomService } from '@/services/api';
 
 const props = defineProps({
   room: {
@@ -30,8 +29,6 @@ const loading = ref(false);
 const error = ref(null);
 const bookingComplete = ref(false);
 const bookingReference = ref('');
-const isLoggedIn = ref(AuthService.isLoggedIn());
-const authError = ref(null);
 
 // check for pre-filled form data (from room details quick booking)
 const initialFormData = props.room.formData || {};
@@ -48,28 +45,60 @@ const form = ref({
   phone: '',
   specialRequests: '',
   paymentMethod: 'credit-card',
-  agreeToTerms: false,
-  // Auth fields
-  createAccount: true,
-  username: '',
-  password: ''
+  agreeToTerms: false
 });
 
 // Check room availability when dates change
 const roomAvailable = ref(true);
 const checkingAvailability = ref(false);
 
+// Check room availability when dates change
 async function checkRoomAvailability() {
   if (!form.value.checkInDate || !form.value.checkOutDate) return;
   
   try {
     checkingAvailability.value = true;
-    const result = await RoomService.checkAvailability(
-      props.room.id,
-      form.value.checkInDate,
-      form.value.checkOutDate
-    );
-    roomAvailable.value = result.available;
+    
+    // Import the Supabase functions
+    const { selectData } = await import('@/lib/supabase');
+    
+    // Generate all dates in the range
+    const checkIn = new Date(form.value.checkInDate);
+    const checkOut = new Date(form.value.checkOutDate);
+    const dates = [];
+    
+    let currentDate = new Date(checkIn);
+    while (currentDate < checkOut) {
+      dates.push(currentDate.toISOString().split('T')[0]);
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    console.log('Checking availability for dates:', dates);
+    
+    // Check availability for each date
+    let allDatesAvailable = true;
+    
+    for (const date of dates) {
+      const availabilityData = await selectData('room_availability', {
+        select: '*',
+        filters: {
+          room_type_id: props.room.id,
+          date: date
+        }
+      });
+      
+      console.log(`Availability for ${date}:`, availabilityData);
+      
+      // Check if we have availability for this date
+      if (!availabilityData || availabilityData.length === 0 || availabilityData[0].available_rooms <= 0) {
+        allDatesAvailable = false;
+        break;
+      }
+    }
+    
+    roomAvailable.value = allDatesAvailable;
+    console.log('Room availability result:', roomAvailable.value);
+    
   } catch (err) {
     console.error('Error checking availability:', err);
     roomAvailable.value = false;
@@ -132,11 +161,7 @@ const isFormValid = computed(() => {
   );
 });
 
-// Function to handle authentication data updates
-function handleAuthData(authData) {
-  form.value.username = authData.username;
-  form.value.password = authData.password;
-}
+// Remove handleAuthData function as it's no longer needed
 
 // Handle form submission
 async function submitBooking() {
@@ -152,38 +177,8 @@ async function submitBooking() {
   
   loading.value = true;
   error.value = null;
-  authError.value = null;
   
   try {
-    // Handle authentication first if user wants to create an account
-    let userId = null;
-    
-    if (form.value.createAccount && form.value.username && form.value.password) {
-      try {
-        if (isLoggedIn.value) {
-          // Get current user ID
-          const userInfo = await AuthService.getCurrentUser();
-          userId = userInfo.user.id;
-        } else {
-          // Register new user
-          const authData = await AuthService.register({
-            email: form.value.email,
-            username: form.value.username,
-            password: form.value.password
-          });
-          
-          // Save auth token
-          AuthService.setAuthToken(authData.token);
-          userId = authData.user.id;
-          isLoggedIn.value = true;
-        }
-      } catch (authErr) {
-        console.error('Authentication error:', authErr);
-        authError.value = authErr.response?.data?.error || 'An error occurred during authentication';
-        // Continue with booking without linking to account
-      }
-    }
-    
     // Create booking object
     const bookingData = {
       roomTypeId: props.room.id,
@@ -200,23 +195,92 @@ async function submitBooking() {
       totalPrice: totalPrice.value
     };
     
-    // Add user ID if available
-    if (userId) {
-      bookingData.userId = userId;
+    // Ensure roomTypeId is a number (if it's coming from a string representation)
+    bookingData.roomTypeId = parseInt(bookingData.roomTypeId, 10);
+    
+    // Import the Supabase functions
+    const { insertData, updateData, selectData } = await import('@/lib/supabase');
+    
+    // Generate a reference number
+    const reference = `BOOK-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    
+    // Insert booking into database
+    const result = await insertData('bookings', {
+      reference: reference,
+      guest_name: `${bookingData.firstName} ${bookingData.lastName}`,
+      guest_email: bookingData.email,
+      check_in_date: bookingData.checkInDate,
+      check_out_date: bookingData.checkOutDate,
+      room_type_id: bookingData.roomTypeId,
+      guests_count: bookingData.adults + bookingData.children,
+      special_requests: bookingData.specialRequests,
+      total_price: bookingData.totalPrice,
+      status: 'confirmed'
+    });
+    
+    // Update room availability for all dates between check-in and check-out
+    const checkIn = new Date(bookingData.checkInDate);
+    const checkOut = new Date(bookingData.checkOutDate);
+    const dates = [];
+    
+    // Generate all dates in the range
+    let currentDate = new Date(checkIn);
+    while (currentDate < checkOut) {
+      dates.push(currentDate.toISOString().split('T')[0]);
+      currentDate.setDate(currentDate.getDate() + 1);
     }
     
-    // If user is creating an account but there was an auth error,
-    // include the username and password to attempt creation during booking
-    if (form.value.createAccount && authError.value && form.value.username && form.value.password) {
-      bookingData.username = form.value.username;
-      bookingData.password = form.value.password;
+    // Log debugging information
+    console.log('Booking dates:', dates);
+    console.log('Room type ID:', bookingData.roomTypeId);
+    
+    // For each date, update the room availability
+    let availabilitySuccess = true;
+    for (const date of dates) {
+      try {
+        // First, get the current availability for this room on this date
+        console.log(`Checking availability for date ${date}`);
+        const availabilityData = await selectData('room_availability', {
+          select: '*',
+          filters: {
+            room_type_id: bookingData.roomTypeId,
+            date: date
+          }
+        });
+        
+        console.log('Availability data:', availabilityData);
+        
+        // If we found an availability record, update it
+        if (availabilityData && availabilityData.length > 0) {
+          const currentAvailability = availabilityData[0];
+          console.log(`Current available rooms for ${date}:`, currentAvailability.available_rooms);
+          
+          if (currentAvailability.available_rooms > 0) {
+            await updateData('room_availability', 
+              { available_rooms: Math.max(0, currentAvailability.available_rooms - 1) },
+              { id: currentAvailability.id }
+            );
+            console.log(`Updated availability for ${date} to ${currentAvailability.available_rooms - 1} rooms`);
+          } else {
+            console.warn(`No rooms available for ${date}!`);
+            availabilitySuccess = false;
+          }
+        } else {
+          console.warn(`No availability record found for ${date}`);
+          availabilitySuccess = false;
+        }
+      } catch (e) {
+        console.error(`Error updating availability for ${date}:`, e);
+        availabilitySuccess = false;
+      }
     }
     
-    // Save booking to API
-    const response = await BookingService.createBooking(bookingData);
+    if (!availabilitySuccess) {
+      throw new Error('Some dates are no longer available for booking.');
+    }
     
     // Set booking reference for confirmation display
-    bookingReference.value = response.booking_reference;
+    bookingReference.value = reference;
     bookingComplete.value = true;
     
     // Emit completion event
@@ -437,44 +501,6 @@ async function submitBooking() {
         variant="outlined"
         rows="3"
       ></v-textarea>
-      
-      <!-- Authentication Section -->
-      <v-divider class="my-6"></v-divider>
-      
-      <h3 class="text-h6 font-weight-bold mb-4">Account Information</h3>
-      
-      <div v-if="authError" class="mb-4">
-        <v-alert type="error" variant="tonal" closable>
-          {{ authError }}
-        </v-alert>
-      </div>
-      
-      <v-card v-if="isLoggedIn" variant="outlined" class="mb-4 pa-4">
-        <div class="d-flex align-center mb-2">
-          <v-icon color="success" class="mr-2">mdi-check-circle</v-icon>
-          <span class="text-body-1 font-weight-medium">You are logged in</span>
-        </div>
-        <p class="text-body-2">
-          Your booking will be linked to your account automatically, allowing you to manage it later.
-        </p>
-      </v-card>
-      
-      <template v-else>
-        <v-switch
-          v-model="form.createAccount"
-          color="primary"
-          label="Create an account to manage your booking"
-          hide-details
-          class="mb-4"
-        ></v-switch>
-        
-        <BookingAuthForm 
-          v-if="form.createAccount"
-          :email="form.email" 
-          :show-register="true"
-          @auth-data-updated="handleAuthData"
-        />
-      </template>
       
       <v-divider class="mb-6"></v-divider>
       

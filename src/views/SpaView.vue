@@ -1,6 +1,7 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { useIntersectionObserver } from '@vueuse/core'
+import SpaBookingForm from '@/components/spa/SpaBookingForm.vue'
 
 // Spa services and categories from API
 const services = ref({
@@ -55,6 +56,20 @@ const serviceIcons = {
   'group': 'mdi-account-group'
 }
 
+// Background colors for service cards
+const serviceColors = [
+  '#E0F2F1', // Teal lighten-5
+  '#E0F7FA', // Cyan lighten-5
+  '#F3E5F5', // Purple lighten-5
+  '#E8F5E9', // Green lighten-5
+  '#FFF3E0', // Orange lighten-5
+  '#E1F5FE', // Light Blue lighten-5
+  '#FAFAFA', // Grey lighten-5
+  '#F1F8E9', // Light Green lighten-5
+  '#FFEBEE', // Red lighten-5
+  '#E8EAF6'  // Indigo lighten-5
+]
+
 // Function to determine the most appropriate icon for a service based on its name
 const getServiceIcon = (service) => {
   const nameLower = service.name.toLowerCase()
@@ -68,6 +83,12 @@ const getServiceIcon = (service) => {
   
   // Default icon based on category
   return categoryIcons[service.category_name] || 'mdi-spa'
+}
+
+// Function to assign a background color based on service id
+const getServiceColor = (serviceId) => {
+  const index = (serviceId - 1) % serviceColors.length
+  return serviceColors[index]
 }
 
 // Fetch all spa services from the API and organize by category
@@ -420,6 +441,23 @@ const tabs = [
 const showBookingModal = ref(false)
 const selectedService = ref(null)
 
+// Watch for tab changes to reapply animations
+watch(activeTab, (newTab) => {
+  // Wait for DOM update
+  nextTick(() => {
+    // Select all service cards in the current tab and apply animations
+    document.querySelectorAll('.service-card').forEach((el, index) => {
+      // Reset animation state
+      el.classList.remove('service-visible')
+      
+      // Re-apply with delay
+      setTimeout(() => {
+        el.classList.add('service-visible')
+      }, index * 100)
+    })
+  })
+})
+
 // For featured services carousel
 const featuredServices = computed(() => {
   const featured = []
@@ -456,40 +494,60 @@ const closeBookingModal = () => {
   showBookingModal.value = false
 }
 
+// Update animation for tab content
+const updateAnimation = () => {
+  nextTick(() => {
+    const serviceCards = document.querySelectorAll('.service-card');
+    serviceCards.forEach((card, i) => {
+      // Remove existing animation class
+      card.classList.remove('service-visible');
+      
+      // Force reflow to restart animation
+      void card.offsetWidth;
+      
+      // Add the animation class with a delay based on index
+      setTimeout(() => {
+        card.classList.add('service-visible');
+      }, i * 50); // Faster delay for smoother appearance
+    });
+  });
+};
+
 // For scroll reveal animations and data loading
 onMounted(() => {
   // Fetch spa services data
-  fetchServices()
+  fetchServices();
+  
+  // Watch tab changes and update animations
+  watch(activeTab, () => {
+    updateAnimation();
+  });
   
   // Animation for hero section
   useIntersectionObserver(heroSection, ([{ isIntersecting }]) => {
     if (isIntersecting) {
-      document.querySelector('.spa-hero-content').classList.add('hero-visible')
+      document.querySelector('.spa-hero-content').classList.add('hero-visible');
     }
-  })
+  });
 
   // Animation for featured section
   useIntersectionObserver(featuredSection, ([{ isIntersecting }]) => {
     if (isIntersecting) {
       document.querySelectorAll('.featured-card').forEach((el, index) => {
         setTimeout(() => {
-          el.classList.add('featured-visible')
-        }, index * 200)
-      })
+          el.classList.add('featured-visible');
+        }, index * 200);
+      });
     }
-  })
+  });
 
   // Animation for services section
   useIntersectionObserver(servicesSection, ([{ isIntersecting }]) => {
     if (isIntersecting) {
-      document.querySelectorAll('.service-card').forEach((el, index) => {
-        setTimeout(() => {
-          el.classList.add('service-visible')
-        }, index * 100)
-      })
+      updateAnimation();
     }
-  })
-})
+  });
+});
 </script>
 
 <template>
@@ -564,13 +622,13 @@ onMounted(() => {
               hover
               @click="openBookingModal(service)"
             >
-              <div class="featured-img-container">
-                <v-img 
-                  :src="service.image" 
-                  height="200" 
-                  cover 
-                  class="rounded-t-lg"
-                ></v-img>
+              <div class="featured-img-container" :style="{ backgroundColor: getServiceColor(service.id) }">
+                <v-icon 
+                  :icon="service.icon" 
+                  size="64"
+                  color="primary"
+                  class="featured-icon"
+                ></v-icon>
                 <div class="featured-badge">Featured</div>
               </div>
               <v-card-title class="text-h5 pt-4 d-flex align-center">
@@ -630,37 +688,49 @@ onMounted(() => {
               <!-- Tab Content -->
               <v-window v-model="activeTab">
                 <!-- Loading State -->
-                <v-row v-if="isLoading" class="pa-4">
-                  <v-col cols="12" class="text-center">
-                    <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
-                    <p class="mt-4">Loading spa services...</p>
-                  </v-col>
-                </v-row>
+                <template v-if="isLoading">
+                  <v-window-item :value="0">
+                    <v-container class="pa-4">
+                      <v-row>
+                        <v-col cols="12" class="text-center">
+                          <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
+                          <p class="mt-4">Loading spa services...</p>
+                        </v-col>
+                      </v-row>
+                    </v-container>
+                  </v-window-item>
+                </template>
                 
                 <!-- Error State -->
-                <v-row v-else-if="loadingError" class="pa-4">
-                  <v-col cols="12">
-                    <v-alert type="error" variant="tonal" border="start">
-                      {{ loadingError }}
-                      <v-btn class="mt-3" color="primary" @click="fetchServices">Try Again</v-btn>
-                    </v-alert>
-                  </v-col>
-                </v-row>
+                <template v-else-if="loadingError">
+                  <v-window-item :value="0">
+                    <v-container class="pa-4">
+                      <v-row>
+                        <v-col cols="12">
+                          <v-alert type="error" variant="tonal" border="start">
+                            {{ loadingError }}
+                            <v-btn class="mt-3" color="primary" @click="fetchServices">Try Again</v-btn>
+                          </v-alert>
+                        </v-col>
+                      </v-row>
+                    </v-container>
+                  </v-window-item>
+                </template>
                 
                 <!-- Services Content -->
-                <v-window-item 
-                  v-else
-                  v-for="(tab, index) in tabs" 
-                  :key="index" 
-                  :value="index"
-                  class="pa-4"
-                >
-                  <v-row>
-                    <v-col 
-                      v-for="service in currentTabServices" 
-                      :key="service.id" 
-                      cols="12" sm="6" lg="4"
-                    >
+                <template v-else>
+                  <v-window-item 
+                    v-for="(tab, index) in tabs" 
+                    :key="index" 
+                    :value="index"
+                  >
+                    <v-container class="pa-4">
+                      <v-row>
+                        <v-col 
+                          v-for="service in services[tab.category]" 
+                          :key="service.id" 
+                          cols="12" sm="6" lg="4"
+                        >
                       <v-card 
                         class="service-card elevation-1 rounded-lg h-100 mb-4"
                         hover
@@ -671,11 +741,13 @@ onMounted(() => {
                             class="ma-3" 
                             size="64" 
                             rounded
+                            :style="{ backgroundColor: getServiceColor(service.id) }"
                           >
-                            <v-img 
-                              :src="service.image" 
-                              cover
-                            ></v-img>
+                            <v-icon 
+                              :icon="service.icon" 
+                              size="36"
+                              color="primary"
+                            ></v-icon>
                           </v-avatar>
                           <div class="grow pt-3 pr-3">
                             <v-card-title class="text-subtitle-1 px-0 py-1 d-flex align-center">
@@ -708,8 +780,10 @@ onMounted(() => {
                       </v-card>
                     </v-col>
                   </v-row>
-                </v-window-item>
-              </v-window>
+                </v-container>
+              </v-window-item>
+            </template>
+            </v-window>
             </v-card>
           </v-col>
         </v-row>
@@ -825,6 +899,16 @@ onMounted(() => {
 
 .featured-img-container {
   position: relative;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.featured-icon {
+  opacity: 0.8;
 }
 
 .featured-badge {
@@ -845,9 +929,10 @@ onMounted(() => {
 }
 
 .service-card {
-  transform: translateY(20px);
+  transform: translateY(10px);
   opacity: 0;
-  transition: transform 0.5s ease-out, opacity 0.5s ease-out, box-shadow 0.3s ease;
+  transition: transform 0.4s ease, opacity 0.4s ease, box-shadow 0.3s ease;
+  will-change: transform, opacity;
 }
 
 .service-visible {
