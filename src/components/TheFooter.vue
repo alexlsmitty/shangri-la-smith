@@ -243,7 +243,7 @@ const subscribeToNewsletter = () => {
 
 .footer-image-container {
   width: 100%;
-  background-image: url('@/assets/images/resort-drone.jpg');
+  background-image: url('@/assets/images/resort-drone.webp');
   background-size: cover;
   background-position: center;
   position: relative;
