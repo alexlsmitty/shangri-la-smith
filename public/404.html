@@ -5,30 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Page Not Found - Shangri-La Beach Resort</title>
   <script>
-    // This script handles SPA routing for GitHub Pages
-    // It captures the current URL, then redirects to the index page
-    // with a query parameter to indicate the desired route
+    // SPA Routing for GitHub Pages 
     (function() {
-      // Get the path without the base path (repository name)
-      const repository = 'shangri-la-smith';
-      const path = window.location.pathname;
+      // Get the repository name from the URL
+      var pathSegments = window.location.pathname.split('/');
+      var repoName = 'shangri-la-smith'; // Your repository name
       
-      // Extract route from the path (remove the repository name)
-      let route = path;
-      if (path.indexOf('/' + repository + '/') === 0) {
-        route = path.substr(repository.length + 1);
+      // Extract the path without the repo name prefix
+      var path = window.location.pathname;
+      if (path.indexOf('/' + repoName + '/') === 0) {
+        path = path.substr(repoName.length + 1);
       }
-
-      // Create a redirect with the desired route as parameter
-      const redirectURL = window.location.origin + 
-                        (repository ? '/' + repository : '') + 
-                        '/?redirect=' + 
-                        encodeURIComponent(route) + 
-                        window.location.search.replace(/^\?/, '&') + 
-                        window.location.hash;
       
-      // Redirect to the index page with parameters
-      window.location.replace(redirectURL);
+      // Redirect to the index page with the path as a query parameter
+      var redirectUrl = window.location.origin + 
+                       '/' + repoName + 
+                       '/?redirect=' + 
+                       encodeURIComponent(path) +
+                       window.location.search.replace(/^\?/, '&') + 
+                       window.location.hash;
+      
+      window.location.replace(redirectUrl);
     })();
   </script>
   <style>

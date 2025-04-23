@@ -13,6 +13,7 @@
     "start": "node server.js",
     "vercel-install": "npm install terser",
     "vercel-build": "npm run vercel-install && echo 'Building for Vercel...' && npx vite build --config vite.config.vercel.js",
+    "check-gh-pages": "node scripts/check-gh-pages.js",
     "check-deployment": "vite build --debug --mode production && vite preview",
     "verify-deployment": "node --experimental-json-modules deployment-check.js",
     "build-check": "node --experimental-json-modules build-check.js",

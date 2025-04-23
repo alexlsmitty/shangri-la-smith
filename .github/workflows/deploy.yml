@@ -26,7 +26,11 @@ jobs:
         run: npm run lint
 
       - name: Build for GitHub Pages
-        run: npm run build:github
+        run: |
+          echo "Installing terser..."
+          npm install terser --no-save
+          echo "Building for GitHub Pages..."
+          npm run build:github
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}

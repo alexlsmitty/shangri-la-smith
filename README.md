@@ -98,14 +98,23 @@ The project is configured for deployment on both Vercel and GitHub Pages:
 - Add required environment variables
 
 ### GitHub Pages Deployment
-- Use GitHub Actions workflow (provided in repository)
-- Set up repository secrets for environment variables
-- Automatic deployment on push to main branch
+- The site is deployed via GitHub Actions using the included workflow
+- Automatically builds and deploys to GitHub Pages on push to main branch
+- Available at [https://yourusername.github.io/shangri-la-smith/](https://yourusername.github.io/shangri-la-smith/)
+- To configure GitHub Pages deployment:
+  1. Ensure your repository name matches the `base` path in `vite.config.gh-pages.js`
+  2. Set up repository secrets for environment variables (Settings > Secrets > Actions):
+     - `VITE_SUPABASE_URL`
+     - `VITE_SUPABASE_ANON_KEY`
+     - `VITE_OPENWEATHER_API_KEY`
+  3. Push to main branch or manually trigger deployment in Actions tab
 
 ## 📄 Scripts
 
 - `npm run dev` - Start development server
 - `npm run build` - Build for production
+- `npm run build:github` - Build for GitHub Pages deployment
+- `npm run check-gh-pages` - Verify GitHub Pages configuration
 - `npm run lint` - Lint and fix code issues
 - `npm run check-size` - Verify pages meet the 1.8MB size limit
 - `npm run preview` - Preview production build locally
