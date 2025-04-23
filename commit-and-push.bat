@@ -9,7 +9,7 @@ git add .
 
 echo.
 echo Committing changes...
-git commit -m "Fix GitHub Pages deployment with module resolution and SPA routing"
+git commit -m "Fix GitHub Pages deployment with bash-based build corrections"
 
 echo.
 echo Pushing to GitHub...

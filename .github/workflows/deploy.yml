@@ -34,14 +34,74 @@ jobs:
       - name: Check for linting errors
         run: npm run lint
 
-      - name: Build for GitHub Pages
+      - name: Build for GitHub Pages and fix for deployment
         run: |
           echo "Installing terser..."
           npm install terser --no-save
           echo "Building for GitHub Pages..."
           npm run build:github
-          echo "Running GitHub Pages fix script..."
-          node fix-gh-pages.js
+          
+          # Instead of running the fix-gh-pages.js file directly, which may have module issues,
+          # let's directly apply the fixes in bash
+          echo "Applying GitHub Pages fixes directly..."
+          
+          # 1. Make sure dist directory exists
+          if [ ! -f dist/index.html ]; then
+            echo "Error: dist/index.html is missing from build output!"
+            exit 1
+          fi
+          
+          # 2. Add base tag if it doesn't exist
+          if ! grep -q "<base href=\"/shangri-la-smith/\">" dist/index.html; then
+            echo "Adding base tag to index.html..."
+            sed -i 's/<head>/<head>\n    <base href="\/shangri-la-smith\/">/' dist/index.html
+          fi
+          
+          # 3. Add import map if it doesn't exist
+          if ! grep -q "importmap" dist/index.html; then
+            echo "Adding import map to index.html..."
+            sed -i 's/<\/head>/  <script type="importmap">\n    {\n      "imports": {\n        "vue": "https:\/\/unpkg.com\/vue@3.5.13\/dist\/vue.esm-browser.prod.js",\n        "vue-router": "https:\/\/unpkg.com\/vue-router@4.5.0\/dist\/vue-router.esm-browser.js",\n        "vuetify": "https:\/\/unpkg.com\/vuetify@3.3.23\/dist\/vuetify.esm.js",\n        "@vueuse\/core": "https:\/\/unpkg.com\/@vueuse\/core@10.7.0\/index.mjs"\n      }\n    }\n    <\/script>\n<\/head>/' dist/index.html
+          fi
+          
+          # 4. Fix asset paths to include the repository name
+          echo "Fixing asset paths..."
+          sed -i 's/src="\//src="\/shangri-la-smith\//g' dist/index.html
+          sed -i 's/href="\//href="\/shangri-la-smith\//g' dist/index.html
+          
+          # 5. Create 404.html for SPA routing
+          echo "Creating 404.html for SPA routing..."
+          cp dist/index.html dist/404.html
+          
+          # 6. Create redirect script
+          echo "Creating redirect script..."
+          cat > dist/gh-pages-redirect.js << 'EOF'
+          // Handle GitHub Pages SPA routing
+          (function() {
+            const l = window.location;
+            if (l.search) {
+              const q = {};
+              l.search.slice(1).split('&').forEach(v => {
+                const a = v.split('=');
+                q[a[0]] = a[1];
+              });
+              if (q.redirect) {
+                const path = q.redirect.replace(/~and~/g, '&');
+                history.replaceState(null, null, 
+                  l.pathname.slice(0, -1) + (path.startsWith('/') ? path : '/' + path) + 
+                  (q.query ? ('?' + q.query) : '') + 
+                  l.hash
+                );
+              }
+            }
+          })();
+          EOF
+          
+          # 7. Add redirect script to HTML files
+          echo "Adding redirect script to HTML files..."
+          sed -i 's/<\/body>/<script src="\/shangri-la-smith\/gh-pages-redirect.js"><\/script>\n<\/body>/' dist/index.html
+          sed -i 's/<\/body>/<script src="\/shangri-la-smith\/gh-pages-redirect.js"><\/script>\n<\/body>/' dist/404.html
+          
+          echo "GitHub Pages fixes applied successfully!"
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
@@ -52,13 +112,10 @@ jobs:
         run: |
           echo "Checking build output..."
           ls -la dist/
-          if [ ! -f dist/index.html ]; then
-            echo "Error: index.html is missing from build output!"
-            exit 1
-          fi
           echo "Checking for base tag and import map..."
-          grep -q "<base href=\"/shangri-la-smith/\"" dist/index.html || echo "Warning: Base tag is missing!"
+          grep -q "<base href=\"/shangri-la-smith/\">" dist/index.html || echo "Warning: Base tag is missing!"
           grep -q "importmap" dist/index.html || echo "Warning: Import map is missing!"
+          grep -q "gh-pages-redirect.js" dist/index.html || echo "Warning: Redirect script is missing!"
           echo "Build output looks good."
           
       # Create .nojekyll file to prevent Jekyll processing

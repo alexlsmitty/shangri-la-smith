@@ -1,5 +1,11 @@
-const fs = require('fs');
-const path = require('path');
+// Use ES modules syntax instead of CommonJS
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Get current directory using ES modules approach
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Your repository name
 const REPO_NAME = 'shangri-la-smith';
