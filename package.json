@@ -11,7 +11,7 @@
     "format": "prettier --write src/",
     "init-db": "node init-db.js",
     "start": "node server.js",
-    "vercel-build": "npm run init-db && vite build",
+    "vercel-build": "npm run init-db && npx vite build",
     "check-deployment": "vite build --debug --mode production && vite preview",
     "verify-deployment": "node --experimental-json-modules deployment-check.js",
     "build-check": "node --experimental-json-modules build-check.js",
@@ -28,7 +28,10 @@
     "swiper": "^11.0.5",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0",
-    "vuetify": "^3.3.23"
+    "vuetify": "^3.3.23",
+    "vite": "^6.2.4",
+    "@vitejs/plugin-vue": "^5.2.3",
+    "vite-plugin-vue-devtools": "^7.7.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
