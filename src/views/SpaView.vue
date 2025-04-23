@@ -442,7 +442,7 @@ const showBookingModal = ref(false)
 const selectedService = ref(null)
 
 // Watch for tab changes to reapply animations
-watch(activeTab, (newTab) => {
+watch(activeTab, () => {
   // Wait for DOM update
   nextTick(() => {
     // Select all service cards in the current tab and apply animations
@@ -468,6 +468,7 @@ const featuredServices = computed(() => {
 })
 
 // For current tab services
+// eslint-disable-next-line no-unused-vars
 const currentTabServices = computed(() => {
   return services.value[tabs[activeTab.value].category] || []
 })
@@ -478,6 +479,7 @@ const featuredSection = ref(null)
 const servicesSection = ref(null)
 
 // Open booking modal with selected service
+ 
 const openBookingModal = (service) => {
   selectedService.value = service
   showBookingModal.value = true

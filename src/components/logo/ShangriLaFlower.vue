@@ -35,7 +35,7 @@
  */
 
 // Define props with default values
-const props = defineProps({
+defineProps({
   /** Width of the logo in pixels or other CSS units */
   width: {
     type: [Number, String],

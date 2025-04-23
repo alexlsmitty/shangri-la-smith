@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
+// eslint-disable-next-line no-unused-vars
 import { BookingService, RoomService } from '@/services/api';
 
 const props = defineProps({
@@ -205,6 +206,7 @@ async function submitBooking() {
     const reference = `BOOK-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
     
     // Insert booking into database
+    // eslint-disable-next-line no-unused-vars
     const result = await insertData('bookings', {
       reference: reference,
       guest_name: `${bookingData.firstName} ${bookingData.lastName}`,

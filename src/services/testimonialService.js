@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 import { selectData, insertData } from '@/lib/supabase';
 
 /**

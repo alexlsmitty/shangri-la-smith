@@ -35,7 +35,7 @@
 
 <script setup>
 // Define props with default values
-const props = defineProps({
+defineProps({
   width: {
     type: [Number, String],
     default: 1333

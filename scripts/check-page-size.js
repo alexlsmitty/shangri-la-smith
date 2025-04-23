@@ -152,9 +152,10 @@ async function checkPageSizes() {
   
   try {
     indexHtml = fs.readFileSync(path.join(DIST_DIR, 'index.html'), 'utf8');
-  } catch (error) {
-    console.error('Error: Could not read built index.html file. Make sure to run "npm run build" first.');
-    process.exit(1);
+   
+  } catch {
+  console.error('Error: Could not read built index.html file. Make sure to run "npm run build" first.');
+  process.exit(1);
   }
   
   // Get initial assets from index.html

@@ -34,7 +34,8 @@ try {
     const gitConfigPath = path.join(__dirname, '..', '.git', 'config');
     const gitConfig = fs.readFileSync(gitConfigPath, 'utf8');
     
-    const repoUrlMatch = gitConfig.match(/url\s*=\s*.*[\/:]([^\/]+?)(?:\.git)?$/);
+    // eslint-disable-next-line no-useless-escape
+const repoUrlMatch = gitConfig.match(/url\s*=\s*.*[\/:]([^\/]+?)(?:\.git)?$/);
     const repoName = repoUrlMatch ? repoUrlMatch[1] : null;
     
     if (!repoName) {
