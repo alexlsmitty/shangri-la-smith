@@ -1,0 +1,10 @@
+# Shangri-La Beach Resort Robots.txt
+User-agent: *
+Allow: /
+
+# Main site map
+Sitemap: https://shangri-la-beach-resort.vercel.app/sitemap.xml
+
+# Disallow certain data resources
+Disallow: /api/
+Disallow: /*.json$
