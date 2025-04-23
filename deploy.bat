@@ -9,7 +9,7 @@ git add .
 
 echo.
 echo Committing changes...
-git commit -m "Fix API service reference in router"
+git commit -m "Fix path aliases in Vite config"
 
 echo.
 echo Pushing to GitHub...

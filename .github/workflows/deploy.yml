@@ -26,13 +26,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-        
-      - name: Verify repo structure
-        run: |
-          echo "Checking for required files..."
-          ls -la
-          ls -la src/router/
-          cat src/router/index.js | head -n 20
       
       - name: Build the site
         run: |
