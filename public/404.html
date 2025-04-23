@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shangri-La Beach Resort</title>
+    <meta name="description" content="Experience luxury and tranquility at Shangri-La Beach Resort. Book your dream vacation today!">
+    <script>
+      // Single Page App handling - redirect all paths to the main index.html
+      // with the original path included as a query parameter
+      const path = window.location.pathname;
+      window.location.href = `/?path=${path}`;
+    </script>
+  </head>
+  <body>
+    <p>Redirecting to homepage...</p>
+  </body>
+</html>

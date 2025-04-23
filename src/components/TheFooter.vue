@@ -1,7 +1,8 @@
 <script setup>
 // Import the logo and background image
-import logoImage from '@/assets/shangri-la-logo.svg'
-import resortDroneImage from '@/assets/images/resort-drone.webp'
+// We'll use direct paths instead of imports
+//import logoImage from '@/assets/shangri-la-logo.svg'
+//import resortDroneImage from '@/assets/images/resort-drone.webp'
 import { ref, onMounted } from 'vue'
 import { useIntersectionObserver } from '@vueuse/core'
 
@@ -75,7 +76,7 @@ const subscribeToNewsletter = () => {
             <v-col cols="12" md="4" class="footer-animated">
               <div class="mb-6 d-flex justify-center justify-md-start">
                 <v-img
-                  :src="logoImage"
+                  src="/shangri-la-logo.svg"
                   alt="Shangri-La Beach Resort"
                   max-width="200"
                   class="footer-logo"
@@ -247,7 +248,7 @@ const subscribeToNewsletter = () => {
 
 .footer-image-container {
   width: 100%;
-  background-image: v-bind('`url(${resortDroneImage})`');
+  background-image: url('/images/resort-aerial.webp');
   background-size: cover;
   background-position: center;
   position: relative;

@@ -35,11 +35,8 @@ const menuItems = [
   { title: 'My Bookings', route: '/bookings', icon: 'mdi-calendar-account' },
 ]
 
-// Import the logo directly
-import logoImage from '@/assets/shangri-la-logo.svg'
-
-// Use the imported logo
-const logoPath = logoImage
+// Use direct URL to logo in public folder
+const logoPath = '/shangri-la-logo.svg'
 </script>
 
 <template>

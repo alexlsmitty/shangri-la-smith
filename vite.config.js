@@ -6,6 +6,16 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+    assetsInlineLimit: 0, // Don't inline any assets as data URLs
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
+  },
   base: '/', // Using root path for better compatibility with Vercel
   plugins: [
     vue({
