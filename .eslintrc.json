@@ -8,9 +8,11 @@
     "eslint:recommended",
     "plugin:vue/vue3-recommended"
   ],
+  "parser": "vue-eslint-parser",
   "parserOptions": {
     "ecmaVersion": 2022,
-    "sourceType": "module"
+    "sourceType": "module",
+    "parser": "espree"
   },
   "rules": {
     "no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
