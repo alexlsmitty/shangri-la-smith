@@ -11,7 +11,8 @@
     "format": "prettier --write src/",
     "migrate": "node migrate-to-supabase-fixed.js",
     "start": "node server.js",
-    "vercel-build": "echo 'Building for Vercel...' && vite build",
+    "vercel-install": "npm install terser",
+    "vercel-build": "npm run vercel-install && echo 'Building for Vercel...' && npx vite build --config vite.config.vercel.js",
     "check-deployment": "vite build --debug --mode production && vite preview",
     "verify-deployment": "node --experimental-json-modules deployment-check.js",
     "build-check": "node --experimental-json-modules build-check.js",
@@ -30,6 +31,7 @@
     "dotenv": "16.5.0",
     "express": "^5.1.0",
     "swiper": "^11.0.5",
+    "terser": "^5.29.1",
     "vite": "^6.2.4",
     "vite-plugin-vue-devtools": "^7.7.2",
     "vue": "^3.5.13",
@@ -38,15 +40,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
-    "@vitejs/plugin-vue": "^5.2.3",
     "@vue/eslint-config-prettier": "^10.2.0",
     "eslint": "^9.22.0",
     "eslint-plugin-vue": "~10.0.0",
     "globals": "^16.0.0",
     "prettier": "3.5.3",
     "sass": "^1.69.5",
-    "sass-loader": "^13.3.2",
-    "vite": "^6.2.4",
-    "vite-plugin-vue-devtools": "^7.7.2"
+    "sass-loader": "^13.3.2"
   }
 }
