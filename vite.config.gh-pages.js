@@ -7,7 +7,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 // https://vite.dev/config/
 export default defineConfig({
   // For GitHub Pages, we need to use the repository name as the base path
-  // Replace 'shangri-la-smith' with your actual repository name if different
+  // This should match your GitHub repository name exactly, including case
   base: '/shangri-la-smith/',
   build: {
     outDir: 'dist',

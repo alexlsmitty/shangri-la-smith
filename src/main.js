@@ -12,12 +12,15 @@ const handleGitHubPagesRedirect = () => {
   const redirectPath = searchParams.get('redirect')
   
   if (redirectPath) {
+    console.log('Handling redirect to:', redirectPath)
     // Clean the URL by removing the query parameter
     const newURL = window.location.pathname + window.location.hash
     window.history.replaceState({}, document.title, newURL)
     
     // Use router to navigate to the correct route
-    router.push(redirectPath)
+    // Make sure to add leading slash if not present
+    const formattedPath = redirectPath.startsWith('/') ? redirectPath : `/${redirectPath}`
+    router.push(formattedPath)
   }
 }
 

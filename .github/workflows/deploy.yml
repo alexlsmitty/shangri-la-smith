@@ -32,6 +32,17 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_OPENWEATHER_API_KEY: ${{ secrets.VITE_OPENWEATHER_API_KEY }}
 
+      # Verify built files exist
+      - name: Check build output
+        run: |
+          echo "Checking build output..."
+          ls -la dist/
+          if [ ! -f dist/index.html ]; then
+            echo "Error: index.html is missing from build output!"
+            exit 1
+          fi
+          echo "Build output looks good."
+          
       # Create .nojekyll file to prevent Jekyll processing
       - name: Add .nojekyll file
         run: touch ./dist/.nojekyll
