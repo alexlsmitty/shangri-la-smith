@@ -4,8 +4,6 @@ import { useIntersectionObserver } from '@vueuse/core'
 import testimonialService from '@/services/testimonialService'
 import SectionHeading from '@/components/SectionHeading.vue'
 import EmptyAvatar from '@/components/EmptyAvatar.vue'
-// Import the hero background image directly
-import heroBackgroundImage from '@/assets/images/resort-drone.webp'
 
 // Testimonials data from API
 const testimonials = ref([])
@@ -22,7 +20,17 @@ const page = ref(1)
 const itemsPerPage = 6
 
 // For fixed categories while we wait for API
-const fallbackCategories = ['all', 'Overall Experience', 'Accommodations', 'Dining', 'Spa Services', 'Family Experience', 'Activities', 'Special Occasions', 'Amenities']
+const fallbackCategories = [
+  'all',
+  'Overall Experience',
+  'Accommodations',
+  'Dining',
+  'Spa Services',
+  'Family Experience',
+  'Activities',
+  'Special Occasions',
+  'Amenities',
+]
 
 // For testimonial submission
 const showSubmissionForm = ref(false)
@@ -38,27 +46,28 @@ const submissionError = ref(null)
 // Filtered and sorted testimonials
 const filteredTestimonials = computed(() => {
   let result = [...testimonials.value]
-  
+
   // Filter by category
   if (activeCategory.value !== 'all') {
-    result = result.filter(t => t.category === activeCategory.value)
+    result = result.filter((t) => t.category === activeCategory.value)
   }
-  
+
   // Filter by rating
   if (activeRating.value > 0) {
-    result = result.filter(t => t.rating >= activeRating.value)
+    result = result.filter((t) => t.rating >= activeRating.value)
   }
-  
+
   // Filter by search query
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    result = result.filter(t => 
-      t.name.toLowerCase().includes(query) || 
-      t.text.toLowerCase().includes(query) ||
-      t.location.toLowerCase().includes(query)
+    result = result.filter(
+      (t) =>
+        t.name.toLowerCase().includes(query) ||
+        t.text.toLowerCase().includes(query) ||
+        t.location.toLowerCase().includes(query),
     )
   }
-  
+
   // Sort testimonials
   if (sortOption.value === 'newest') {
     result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
@@ -67,13 +76,13 @@ const filteredTestimonials = computed(() => {
   } else if (sortOption.value === 'lowest') {
     result.sort((a, b) => a.rating - b.rating || new Date(b.created_at) - new Date(a.created_at))
   }
-  
+
   return result
 })
 
 // Featured testimonials
 const featuredTestimonials = computed(() => {
-  return testimonials.value.filter(t => t.featured === true)
+  return testimonials.value.filter((t) => t.featured === true)
 })
 
 // Paginated testimonials
@@ -93,11 +102,11 @@ const loadTestimonials = async () => {
   try {
     isLoading.value = true
     loadError.value = null
-    
+
     // Fetch testimonials
     const data = await testimonialService.getTestimonials()
     testimonials.value = data
-    
+
     // Fetch categories
     try {
       const categoryData = await testimonialService.getCategoryNames()
@@ -106,13 +115,13 @@ const loadTestimonials = async () => {
       console.warn('Error loading categories, using fallbacks:', catError)
       categories.value = fallbackCategories
     }
-    
+
     isLoading.value = false
   } catch (error) {
     console.error('Error loading testimonials:', error)
     loadError.value = 'Failed to load testimonials. Please try again later.'
     isLoading.value = false
-    
+
     // Set fallback categories when testimonials fail to load
     categories.value = fallbackCategories
   }
@@ -121,7 +130,7 @@ const loadTestimonials = async () => {
 // Function to format date
 const formatDate = (dateString) => {
   if (!dateString) return ''
-  
+
   const options = { year: 'numeric', month: 'long', day: 'numeric' }
   return new Date(dateString).toLocaleDateString(undefined, options)
 }
@@ -131,23 +140,23 @@ const submitTestimonial = async () => {
   try {
     isSubmitting.value = true
     submissionError.value = null
-    
+
     // Create testimonial object based on the actual database schema
     const testimonialData = {
       name: userName.value,
       location: userLocation.value,
       category: userCategory.value,
       rating: userRating.value,
-      text: userComment.value
+      text: userComment.value,
     }
-    
+
     // Submit testimonial to API
     const result = await testimonialService.submitTestimonial(testimonialData)
     console.log('Testimonial submitted:', result)
-    
+
     isSubmitting.value = false
     submissionSuccess.value = true
-    
+
     // Reset form after submission
     setTimeout(() => {
       userName.value = ''
@@ -165,6 +174,15 @@ const submitTestimonial = async () => {
   }
 }
 
+// Function to reset all filters
+const resetFilters = () => {
+  activeCategory.value = 'all';
+  activeRating.value = 0;
+  searchQuery.value = '';
+  sortOption.value = 'newest';
+  page.value = 1;
+}
+
 // For scroll reveal animations
 onMounted(() => {
   // Load testimonials data
@@ -173,46 +191,46 @@ onMounted(() => {
   // Set up fallback testimonials if API fails
   setTimeout(() => {
     if (isLoading.value && testimonials.value.length === 0) {
-      console.log('Setting up fallback testimonials');
+      console.log('Setting up fallback testimonials')
       const fallbackTestimonials = [
         {
           id: 1,
-          name: "Sarah M.",
-          location: "New York, USA",
+          name: 'Sarah M.',
+          location: 'New York, USA',
           rating: 5,
           text: "Our stay at Shangri La was absolutely perfect! The service was impeccable, the food was delicious, and the views were breathtaking. We especially loved relaxing by the infinity pool. We can't wait to return!",
-          category: "Overall Experience",
+          category: 'Overall Experience',
           featured: true,
-          created_at: "2025-03-15T14:23:00.000Z"
+          created_at: '2025-03-15T14:23:00.000Z',
         },
         {
           id: 2,
-          name: "John B.",
-          location: "London, UK",
+          name: 'John B.',
+          location: 'London, UK',
           rating: 5,
-          text: "The beachfront suite was amazing! Waking up to the sound of the waves and stepping right onto the sand was incredible. The resort offered so many activities, we never had a dull moment. Highly recommend the snorkeling!",
-          category: "Accommodations",
+          text: 'The beachfront suite was amazing! Waking up to the sound of the waves and stepping right onto the sand was incredible. The resort offered so many activities, we never had a dull moment. Highly recommend the snorkeling!',
+          category: 'Accommodations',
           featured: true,
-          created_at: "2025-03-10T09:45:00.000Z"
+          created_at: '2025-03-10T09:45:00.000Z',
         },
         {
           id: 3,
-          name: "Emily K.",
-          location: "Toronto, Canada",
+          name: 'Emily K.',
+          location: 'Toronto, Canada',
           rating: 5,
           text: "We traveled with our two young children, and the Kids' Club was a lifesaver! The staff were fantastic, and our kids had a blast. This allowed us some much-needed relaxation time. The resort is very family-friendly.",
-          category: "Family Experience",
+          category: 'Family Experience',
           featured: true,
-          created_at: "2025-02-28T16:30:00.000Z"
-        }
-      ];
-      
-      testimonials.value = fallbackTestimonials;
-      isLoading.value = false;
-      loadError.value = null;
+          created_at: '2025-02-28T16:30:00.000Z',
+        },
+      ]
+
+      testimonials.value = fallbackTestimonials
+      isLoading.value = false
+      loadError.value = null
     }
-  }, 3000); // Wait 3 seconds before showing fallbacks
-  
+  }, 3000) // Wait 3 seconds before showing fallbacks
+
   // Animation for hero section
   useIntersectionObserver(heroSection, ([{ isIntersecting }]) => {
     if (isIntersecting) {
@@ -223,7 +241,7 @@ onMounted(() => {
   // Animation for featured section
   useIntersectionObserver(featuredSection, ([{ isIntersecting }]) => {
     if (isIntersecting) {
-      document.querySelectorAll('.featured-testimonial-card').forEach(el => {
+      document.querySelectorAll('.featured-testimonial-card').forEach((el) => {
         el.classList.add('testimonial-visible')
       })
     }
@@ -232,7 +250,7 @@ onMounted(() => {
   // Animation for testimonials section
   useIntersectionObserver(testimonialSection, ([{ isIntersecting }]) => {
     if (isIntersecting) {
-      document.querySelectorAll('.testimonial-card').forEach(el => {
+      document.querySelectorAll('.testimonial-card').forEach((el) => {
         el.classList.add('testimonial-visible')
       })
     }
@@ -251,7 +269,8 @@ onMounted(() => {
               <h1 class="text-h2 font-weight-bold mb-4 text-white">What Our Guests Are Saying</h1>
               <div class="title-underline bg-white mb-6"></div>
               <p class="text-h6 mb-8 text-white max-width-text">
-                Read about the wonderful experiences our guests have had at Shangri La Beach Resort. We are committed to creating unforgettable memories for every visitor.
+                Read about the wonderful experiences our guests have had at Shangri La Beach Resort.
+                We are committed to creating unforgettable memories for every visitor.
               </p>
               <v-btn
                 color="secondary"
@@ -307,9 +326,7 @@ onMounted(() => {
             >
               {{ loadError }}
               <div class="mt-4">
-                <v-btn color="primary" @click="loadTestimonials">
-                  Try Again
-                </v-btn>
+                <v-btn color="primary" @click="loadTestimonials"> Try Again </v-btn>
               </div>
             </v-alert>
           </v-col>
@@ -330,14 +347,8 @@ onMounted(() => {
         </v-row>
 
         <v-row v-else class="mt-8">
-          <v-col 
-            v-for="testimonial in featuredTestimonials" 
-            :key="testimonial.id" 
-            cols="12" md="4"
-          >
-            <v-card
-              class="featured-testimonial-card elevation-4 rounded-lg h-100 pa-6"
-            >
+          <v-col v-for="testimonial in featuredTestimonials" :key="testimonial.id" cols="12" md="4">
+            <v-card class="featured-testimonial-card elevation-4 rounded-lg h-100 pa-6">
               <div class="d-flex align-center mb-4">
                 <v-avatar size="60" class="me-4">
                   <EmptyAvatar :name="testimonial.name" :size="60" />
@@ -347,7 +358,7 @@ onMounted(() => {
                   <div class="text-subtitle-2">{{ testimonial.location }}</div>
                 </div>
               </div>
-              
+
               <div class="mb-4">
                 <v-rating
                   :model-value="testimonial.rating"
@@ -359,16 +370,11 @@ onMounted(() => {
                 ></v-rating>
                 <span class="text-caption ms-2">{{ formatDate(testimonial.created_at) }}</span>
               </div>
-              
-              <v-chip
-                size="small"
-                color="primary"
-                variant="flat"
-                class="mb-4"
-              >
+
+              <v-chip size="small" color="primary" variant="flat" class="mb-4">
                 {{ testimonial.category }}
               </v-chip>
-              
+
               <v-card-text class="text-body-1 font-italic px-0">
                 "{{ testimonial.text }}"
               </v-card-text>
@@ -405,7 +411,7 @@ onMounted(() => {
                 { title: 'All Ratings', value: 0 },
                 { title: '5 Stars and Up', value: 5 },
                 { title: '4 Stars and Up', value: 4 },
-                { title: '3 Stars and Up', value: 3 }
+                { title: '3 Stars and Up', value: 3 },
               ]"
               item-title="title"
               item-value="value"
@@ -420,7 +426,7 @@ onMounted(() => {
               :items="[
                 { title: 'Newest First', value: 'newest' },
                 { title: 'Highest Rating', value: 'highest' },
-                { title: 'Lowest Rating', value: 'lowest' }
+                { title: 'Lowest Rating', value: 'lowest' },
               ]"
               item-title="title"
               item-value="value"
@@ -460,9 +466,7 @@ onMounted(() => {
             >
               {{ loadError }}
               <div class="mt-4">
-                <v-btn color="primary" @click="loadTestimonials">
-                  Try Again
-                </v-btn>
+                <v-btn color="primary" @click="loadTestimonials"> Try Again </v-btn>
               </div>
             </v-alert>
           </v-col>
@@ -470,15 +474,15 @@ onMounted(() => {
 
         <!-- Testimonials Grid -->
         <v-row v-else-if="paginatedTestimonials.length > 0">
-          <v-col 
-            v-for="testimonial in paginatedTestimonials" 
-            :key="testimonial.id" 
-            cols="12" sm="6" lg="4"
+          <v-col
+            v-for="testimonial in paginatedTestimonials"
+            :key="testimonial.id"
+            cols="12"
+            sm="6"
+            lg="4"
             class="mb-4"
           >
-            <v-card 
-              class="testimonial-card elevation-2 h-100 pa-4"
-            >
+            <v-card class="testimonial-card elevation-2 h-100 pa-4">
               <div class="d-flex align-center mb-3">
                 <v-avatar size="50" class="me-3">
                   <EmptyAvatar :name="testimonial.name" :size="50" />
@@ -488,7 +492,7 @@ onMounted(() => {
                   <div class="text-caption">{{ testimonial.location }}</div>
                 </div>
               </div>
-              
+
               <div class="mb-3 d-flex align-center">
                 <v-rating
                   :model-value="testimonial.rating"
@@ -500,19 +504,12 @@ onMounted(() => {
                 ></v-rating>
                 <span class="text-caption ms-2">{{ formatDate(testimonial.created_at) }}</span>
               </div>
-              
-              <v-chip
-                size="x-small"
-                color="primary"
-                variant="flat"
-                class="mb-3"
-              >
+
+              <v-chip size="x-small" color="primary" variant="flat" class="mb-3">
                 {{ testimonial.category }}
               </v-chip>
-              
-              <div class="text-body-2 font-italic">
-                "{{ testimonial.text }}"
-              </div>
+
+              <div class="text-body-2 font-italic">"{{ testimonial.text }}"</div>
             </v-card>
           </v-col>
         </v-row>
@@ -523,10 +520,10 @@ onMounted(() => {
             <v-icon size="64" color="grey">mdi-emoticon-sad-outline</v-icon>
             <h3 class="text-h5 mt-4 mb-2">No Reviews Found</h3>
             <p class="text-body-1">Please try changing your filters or search query.</p>
-            <v-btn 
-              color="primary" 
-              class="mt-4" 
-              @click="activeCategory = 'all'; activeRating = 0; searchQuery = ''"
+            <v-btn
+              color="primary"
+              class="mt-4"
+              @click="resetFilters"
             >
               Reset Filters
             </v-btn>
@@ -555,7 +552,8 @@ onMounted(() => {
             <v-card class="elevation-3 rounded-lg pa-6">
               <h3 class="text-h4 font-weight-bold mb-4">Share Your Experience</h3>
               <p class="text-body-1 mb-6">
-                Have you enjoyed your stay at Shangri La Beach Resort? We would love to hear from you! Share your experience and help future guests plan their perfect getaway.
+                Have you enjoyed your stay at Shangri La Beach Resort? We would love to hear from
+                you! Share your experience and help future guests plan their perfect getaway.
               </p>
               <v-btn
                 color="secondary"
@@ -576,22 +574,17 @@ onMounted(() => {
     <v-dialog v-model="showSubmissionForm" max-width="600" persistent>
       <v-card class="pa-4">
         <v-card-title class="text-h4 font-weight-bold">
-          <v-btn
-            icon
-            variant="text"
-            @click="showSubmissionForm = false"
-            class="float-right"
-          >
+          <v-btn icon variant="text" @click="showSubmissionForm = false" class="float-right">
             <v-icon>mdi-close</v-icon>
           </v-btn>
           {{ submissionSuccess ? 'Thank You!' : 'Share Your Experience' }}
         </v-card-title>
-        
+
         <v-card-text v-if="!submissionSuccess">
           <p class="text-subtitle-1 mb-4">
             We appreciate your feedback. Your review will help us improve and assist future guests.
           </p>
-          
+
           <!-- Error Message -->
           <v-alert
             v-if="submissionError"
@@ -602,33 +595,24 @@ onMounted(() => {
           >
             {{ submissionError }}
           </v-alert>
-          
+
           <v-form @submit.prevent="submitTestimonial">
             <v-row>
               <v-col cols="12">
                 <label class="text-subtitle-2 font-weight-bold mb-2 d-block">Your Rating</label>
                 <div class="d-flex align-center">
-                  <v-rating
-                    v-model="userRating"
-                    color="amber"
-                    hover
-                    size="large"
-                  ></v-rating>
+                  <v-rating v-model="userRating" color="amber" hover size="large"></v-rating>
                   <span class="text-subtitle-1 ms-2">{{ userRating }} / 5</span>
                 </div>
               </v-col>
             </v-row>
-            
+
             <v-row>
               <v-col cols="12">
-                <v-text-field
-                  v-model="userName"
-                  label="Your Name"
-                  required
-                ></v-text-field>
+                <v-text-field v-model="userName" label="Your Name" required></v-text-field>
               </v-col>
             </v-row>
-            
+
             <v-row>
               <v-col cols="12" sm="6">
                 <v-text-field
@@ -641,12 +625,12 @@ onMounted(() => {
                 <v-select
                   v-model="userCategory"
                   label="Experience Type"
-                  :items="categories.filter(c => c !== 'all')"
+                  :items="categories.filter((c) => c !== 'all')"
                   required
                 ></v-select>
               </v-col>
             </v-row>
-            
+
             <v-row>
               <v-col cols="12">
                 <v-textarea
@@ -659,7 +643,7 @@ onMounted(() => {
                 ></v-textarea>
               </v-col>
             </v-row>
-            
+
             <v-row>
               <v-col cols="12">
                 <v-checkbox
@@ -668,13 +652,13 @@ onMounted(() => {
                 ></v-checkbox>
               </v-col>
             </v-row>
-            
+
             <v-row>
               <v-col cols="12" class="text-center">
-                <v-btn 
-                  color="primary" 
-                  size="large" 
-                  class="px-8" 
+                <v-btn
+                  color="primary"
+                  size="large"
+                  class="px-8"
                   type="submit"
                   :loading="isSubmitting"
                   :disabled="!userName || !userLocation || !userCategory || !userComment"
@@ -686,19 +670,18 @@ onMounted(() => {
             </v-row>
           </v-form>
         </v-card-text>
-        
+
         <v-card-text v-else class="text-center pa-6">
           <v-icon color="success" size="64" class="mb-4">mdi-check-circle</v-icon>
           <h3 class="text-h5 mb-4">Thank You for Your Review!</h3>
           <p class="text-body-1 mb-6">
-            We appreciate you taking the time to share your experience at Shangri La Beach Resort. Your feedback is valuable to us and helps other travelers make informed decisions.
+            We appreciate you taking the time to share your experience at Shangri La Beach Resort.
+            Your feedback is valuable to us and helps other travelers make informed decisions.
           </p>
           <p class="text-body-2 mb-6">
             Your review has been submitted and will be published after a quick review by our team.
           </p>
-          <v-btn color="primary" @click="showSubmissionForm = false">
-            Close
-          </v-btn>
+          <v-btn color="primary" @click="showSubmissionForm = false"> Close </v-btn>
         </v-card-text>
       </v-card>
     </v-dialog>
@@ -731,7 +714,9 @@ onMounted(() => {
   max-width: 800px;
   transform: translateY(30px);
   opacity: 0;
-  transition: transform 0.8s ease, opacity 0.8s ease;
+  transition:
+    transform 0.8s ease,
+    opacity 0.8s ease;
 }
 
 .hero-visible {
@@ -751,10 +736,14 @@ onMounted(() => {
 }
 
 /* Featured testimonials */
-.featured-testimonial-card, .testimonial-card {
+.featured-testimonial-card,
+.testimonial-card {
   transform: translateY(10px);
   opacity: 0.9;
-  transition: transform 0.3s ease-out, opacity 0.3s ease-out, box-shadow 0.2s ease;
+  transition:
+    transform 0.3s ease-out,
+    opacity 0.3s ease-out,
+    box-shadow 0.2s ease;
 }
 
 .testimonial-visible {
@@ -762,7 +751,8 @@ onMounted(() => {
   opacity: 1 !important;
 }
 
-.featured-testimonial-card:hover, .testimonial-card:hover {
+.featured-testimonial-card:hover,
+.testimonial-card:hover {
   transform: translateY(-5px) !important;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
 }

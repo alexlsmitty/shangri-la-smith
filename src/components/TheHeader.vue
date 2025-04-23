@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useDisplay } from 'vuetify'
 import { RouterLink } from 'vue-router'
 import WeatherWidget from './WeatherWidget.vue'
+import ShangriLaLogo from './logo/ShangriLaLogo.vue'
 
 const { mobile, smAndDown, mdAndDown, name, width } = useDisplay()
 
@@ -35,8 +36,8 @@ const menuItems = [
   { title: 'My Bookings', route: '/bookings', icon: 'mdi-calendar-account' },
 ]
 
-// Use direct URL to logo in public folder
-const logoPath = '/shangri-la-logo.svg'
+// Default logo color (white for header)
+const logoColor = ref('#ffffff')
 </script>
 
 <template>
@@ -50,7 +51,7 @@ const logoPath = '/shangri-la-logo.svg'
     <!-- Logo Section -->
     <div class="logo-section">
       <RouterLink to="/">
-        <img :src="logoPath" alt="Shangri-La Beach Resort" class="logo" />
+        <ShangriLaLogo :color="logoColor" width="180" height="60" class="logo" />
       </RouterLink>
     </div>
 
@@ -91,7 +92,7 @@ const logoPath = '/shangri-la-logo.svg'
   <!-- Mobile Navigation Drawer -->
   <v-navigation-drawer v-model="drawer" temporary location="left" width="280">
     <div class="drawer-header">
-      <img :src="logoPath" alt="Shangri-La Beach Resort" class="drawer-logo" />
+      <ShangriLaLogo :color="logoColor" width="180" height="60" class="drawer-logo" />
       <div class="drawer-weather mt-2 pa-2 rounded">
         <WeatherWidget />
       </div>
@@ -164,9 +165,6 @@ const logoPath = '/shangri-la-logo.svg'
 }
 
 .logo {
-  height: 60px;
-  width: auto;
-  filter: brightness(0) invert(1); /* Make the logo white */
   transition: transform 0.3s ease;
 }
 
@@ -260,9 +258,7 @@ const logoPath = '/shangri-la-logo.svg'
 }
 
 .drawer-logo {
-  width: 180px;
-  height: auto;
-  filter: brightness(0) invert(1); /* Make the logo white */
+  /* Styles for logo in drawer - no need for filter since color is passed as prop */
 }
 
 .drawer-weather {

@@ -4,31 +4,51 @@ import { useRouter } from 'vue-router'
 import { useIntersectionObserver } from '@vueuse/core'
 
 // Import background images
-import resortBgImage from '@/assets/images/resort-2495217_1920.webp'
-import beachAccessImage from '@/assets/images/general/beachpool.webp'
-import infinityPoolImage from '@/assets/images/general/beachpool2.webp'
-import spaImage from '@/assets/images/general/meditation.webp'
-import diningImage from '@/assets/images/general/cooking.webp'
-import room1Image from '@/assets/images/hotel-room1.webp'
-import room2Image from '@/assets/images/hotel-room2.webp'
-import room3Image from '@/assets/images/hotel-room3.webp'
-import activitiesBgImage from '@/assets/images/general/nicebeach.webp'
-import avatarImage from '@/assets/images/single.webp'
-import ctaBgImage from '@/assets/images/resort-drone.webp'
+import resortBgImage from '@/assets/images/compressed/resort-2495217_1920_compressed.webp'
+import beachAccessImage from '@/assets/images/compressed/beachpool_compressed.webp'
+import infinityPoolImage from '@/assets/images/compressed/beachpool2_compressed.webp'
+import spaImage from '@/assets/images/compressed/meditation_compressed.webp'
+import diningImage from '@/assets/images/compressed/cooking_compressed.webp'
+import room1Image from '@/assets/images/compressed/hotel-room1_compressed.webp'
+import room2Image from '@/assets/images/compressed/hotel-room2_compressed.webp'
+import room3Image from '@/assets/images/compressed/hotel-room3_compressed.webp'
+import activitiesBgImage from '@/assets/images/compressed/nicebeach_compressed.webp'
+import avatarImage from '@/assets/images/compressed/single_compressed.webp'
+import ctaBgImage from '@/assets/images/compressed/resort-drone_compressed.webp'
 
-// Create style object with background images
+// This function can be uncommented if WebP support detection is needed
+/*
+const checkWebpSupport = async () => {
+  try {
+    // Create a test WebP image in memory
+    const webpData = 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoCAAEAAQAcJaQAA3AA/v3AgAA=';
+    const img = new Image();
+    // Set up a promise to check loading
+    const webpSupport = await new Promise((resolve) => {
+      img.onload = () => resolve(img.width > 0 && img.height > 0);
+      img.onerror = () => resolve(false);
+      img.src = webpData;
+    });
+    return webpSupport;
+  } catch (error) {
+    return false;
+  }
+};
+*/
+
+// Create style object with background images with quality parameters for WebP
 const bgStyles = computed(() => ({
-  heroBg: { backgroundImage: `url(${resortBgImage})` },
-  beachImg: { backgroundImage: `url(${beachAccessImage})` },
-  poolImg: { backgroundImage: `url(${infinityPoolImage})` },
-  spaImg: { backgroundImage: `url(${spaImage})` },
-  diningImg: { backgroundImage: `url(${diningImage})` },
-  room1Img: { backgroundImage: `url(${room1Image})` },
-  room2Img: { backgroundImage: `url(${room2Image})` },
-  room3Img: { backgroundImage: `url(${room3Image})` },
-  activitiesImg: { backgroundImage: `url(${activitiesBgImage})` },
-  avatarImg: { backgroundImage: `url(${avatarImage})` },
-  ctaImg: { backgroundImage: `url(${ctaBgImage})` }
+  heroBg: { backgroundImage: `url(${resortBgImage})`, backgroundSize: 'cover', backgroundPosition: 'center 40%' },
+  beachImg: { backgroundImage: `url(${beachAccessImage})`, backgroundSize: 'cover' },
+  poolImg: { backgroundImage: `url(${infinityPoolImage})`, backgroundSize: 'cover' },
+  spaImg: { backgroundImage: `url(${spaImage})`, backgroundSize: 'cover' },
+  diningImg: { backgroundImage: `url(${diningImage})`, backgroundSize: 'cover' },
+  room1Img: { backgroundImage: `url(${room1Image})`, backgroundSize: 'cover' },
+  room2Img: { backgroundImage: `url(${room2Image})`, backgroundSize: 'cover' },
+  room3Img: { backgroundImage: `url(${room3Image})`, backgroundSize: 'cover' },
+  activitiesImg: { backgroundImage: `url(${activitiesBgImage})`, backgroundSize: 'cover', backgroundPosition: 'center 30%' },
+  avatarImg: { backgroundImage: `url(${avatarImage})`, backgroundSize: 'cover', backgroundPosition: 'center top' },
+  ctaImg: { backgroundImage: `url(${ctaBgImage})`, backgroundSize: 'cover', backgroundPosition: 'center 20%' }
 }))
 
 const router = useRouter()
@@ -39,8 +59,47 @@ const roomsSection = ref(null)
 const testimonialsSection = ref(null)
 const activitiesSection = ref(null)
 
-// For animated scroll reveal
+// For animated scroll reveal and image loading optimization
 onMounted(() => {
+  // Preload the critical hero image
+  const preloadLink = document.createElement('link');
+  preloadLink.rel = 'preload';
+  preloadLink.as = 'image';
+  preloadLink.href = resortBgImage;
+  document.head.appendChild(preloadLink);
+  
+  // Helper function to load images only when they're about to be visible
+  const lazyLoadImage = (element, imageUrl) => {
+    // Create an observer for the element
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        // If the element is about to be visible
+        if (entry.isIntersecting) {
+          // Load the image
+          const img = new Image();
+          img.src = imageUrl;
+          // Remove the observer once loaded
+          observer.disconnect();
+        }
+      });
+    }, { rootMargin: '200px' }); // Start loading when within 200px of viewport
+    
+    observer.observe(element);
+  };
+  
+  // Lazy load non-critical images
+  setTimeout(() => {
+    try {
+      const featureCards = document.querySelectorAll('.feature-card');
+      if (featureCards[0]) lazyLoadImage(featureCards[0], beachAccessImage);
+      if (featureCards[1]) lazyLoadImage(featureCards[1], infinityPoolImage);
+      if (featureCards[2]) lazyLoadImage(featureCards[2], spaImage);
+      if (featureCards[3]) lazyLoadImage(featureCards[3], diningImage);
+    } catch (error) {
+      console.warn('Error in lazy loading feature images:', error);
+    }
+  }, 1000);
+
   // Animation for featured section
   useIntersectionObserver(featuredSection, ([{ isIntersecting }]) => {
     if (isIntersecting) {
@@ -169,7 +228,7 @@ const testimonials = [
                 views.
               </v-card-text>
               <!-- Use direct path -->
-              <div class="feature-image private-beach-image" :style="bgStyles.beachImg"></div>
+              <div class="feature-image private-beach-image" :style="bgStyles.beachImg" loading="lazy"></div>
             </v-card>
           </v-col>
 
@@ -190,7 +249,7 @@ const testimonials = [
                 sea.
               </v-card-text>
               <!-- Use direct path -->
-              <div class="feature-image infinity-pool-image" :style="bgStyles.poolImg"></div>
+              <div class="feature-image infinity-pool-image" :style="bgStyles.poolImg" loading="lazy"></div>
             </v-card>
           </v-col>
 
@@ -211,7 +270,7 @@ const testimonials = [
                 traditions.
               </v-card-text>
               <!-- Use direct path -->
-              <div class="feature-image spa-image" :style="bgStyles.spaImg"></div>
+              <div class="feature-image spa-image" :style="bgStyles.spaImg" loading="lazy"></div>
             </v-card>
           </v-col>
 
@@ -232,7 +291,7 @@ const testimonials = [
                 international flavors.
               </v-card-text>
               <!-- Use direct path -->
-              <div class="feature-image dining-image" :style="bgStyles.diningImg"></div>
+              <div class="feature-image dining-image" :style="bgStyles.diningImg" loading="lazy"></div>
             </v-card>
           </v-col>
         </v-row>
@@ -257,7 +316,7 @@ const testimonials = [
               @click="gotoPage('/rooms')"
             >
               <div class="room-img-container">
-                <div class="room-image room-1" :style="bgStyles.room1Img"></div>
+                <div class="room-image room-1" :style="bgStyles.room1Img" loading="lazy"></div>
                 <div class="room-overlay d-flex flex-column justify-end">
                   <div class="pa-4 text-white">
                     <h3 class="text-h5 font-weight-bold">Ocean View Deluxe Room</h3>
@@ -284,7 +343,7 @@ const testimonials = [
               @click="gotoPage('/rooms')"
             >
               <div class="room-img-container">
-                <div class="room-image room-2" :style="bgStyles.room2Img"></div>
+                <div class="room-image room-2" :style="bgStyles.room2Img" loading="lazy"></div>
                 <div class="room-overlay d-flex flex-column justify-end">
                   <div class="pa-4 text-white">
                     <h3 class="text-h5 font-weight-bold">Beachfront Suite</h3>
@@ -311,7 +370,7 @@ const testimonials = [
               @click="gotoPage('/rooms')"
             >
               <div class="room-img-container">
-                <div class="room-image room-3" :style="bgStyles.room3Img"></div>
+                <div class="room-image room-3" :style="bgStyles.room3Img" loading="lazy"></div>
                 <div class="room-overlay d-flex flex-column justify-end">
                   <div class="pa-4 text-white">
                     <h3 class="text-h5 font-weight-bold">Garden View Family Room</h3>
@@ -352,7 +411,7 @@ const testimonials = [
 
     <!-- Activities Section -->
     <section ref="activitiesSection" class="py-12 activities-section position-relative">
-      <div class="activities-background" :style="bgStyles.activitiesImg">
+      <div class="activities-background" :style="bgStyles.activitiesImg" loading="lazy">
         <div class="activities-overlay d-flex align-center">
           <v-container>
             <v-row>
@@ -416,7 +475,7 @@ const testimonials = [
         <v-row>
           <v-col v-for="(testimonial, index) in testimonials" :key="index" cols="12" md="4">
             <v-card class="testimonial-card elevation-3 rounded-lg pa-6 h-100">
-              <div class="testimonial-avatar mb-4" :style="bgStyles.avatarImg"></div>
+              <div class="testimonial-avatar mb-4" :style="bgStyles.avatarImg" loading="lazy"></div>
               <div class="mb-4">
                 <v-rating
                   :model-value="testimonial.rating"
@@ -454,7 +513,7 @@ const testimonials = [
 
     <!-- Call to Action Section -->
     <section class="py-12 cta-section">
-      <div class="cta-background" :style="bgStyles.ctaImg">
+      <div class="cta-background" :style="bgStyles.ctaImg" loading="lazy">
         <div class="cta-overlay d-flex flex-column justify-center align-center text-center">
           <h2 class="text-h3 font-weight-bold mb-4 text-white">Ready to Experience Paradise?</h2>
           <p class="text-h6 mb-6 text-white max-width-text mx-auto">
@@ -488,8 +547,6 @@ const testimonials = [
 .hero-background {
   height: 100%;
   width: 100%;
-  background-size: cover;
-  background-position: center;
   background-repeat: no-repeat;
 }
 
@@ -575,9 +632,9 @@ const testimonials = [
 .feature-image {
   height: 160px;
   width: 100%;
-  background-size: cover;
-  background-position: center;
   margin-top: 8px;
+  transition: opacity 0.5s ease-in;
+  animation: fadeIn 0.8s ease-in-out;
 }
 
 /* Rooms Section */
@@ -603,8 +660,6 @@ const testimonials = [
 .room-image {
   height: 100%;
   width: 100%;
-  background-size: cover;
-  background-position: center;
   transition: transform 0.6s ease;
 }
 
@@ -612,17 +667,11 @@ const testimonials = [
   transform: scale(1.05);
 }
 
-.room-1 {
-  /* Background now set via :style binding */
-}
 
-.room-2 {
-  /* Background now set via :style binding */
-}
 
-.room-3 {
-  /* Background now set via :style binding */
-}
+
+
+
 
 .room-overlay {
   position: absolute;
@@ -658,8 +707,6 @@ const testimonials = [
   right: 0;
   bottom: 0;
   /* Background now set via :style binding */
-  background-size: cover;
-  background-position: center;
 }
 
 .activities-overlay {
@@ -700,8 +747,6 @@ const testimonials = [
   background-color: var(--shangri-la-teal);
   margin: 0 auto;
   /* Background now set via :style binding */
-  background-size: cover;
-  background-position: center;
 }
 
 .fade-in {
@@ -722,8 +767,6 @@ const testimonials = [
   right: 0;
   bottom: 0;
   /* Background now set via :style binding */
-  background-size: cover;
-  background-position: center;
 }
 
 .cta-overlay {

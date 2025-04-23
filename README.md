@@ -3,7 +3,7 @@
 A modern, responsive Vue.js-based website for the Shangri-La Beach Resort, featuring room bookings, spa services, dining options, activities, and testimonials - all with a luxurious tropical paradise theme.
 
 <p align="center">
-  <img src="./public/shangri-la-logo.svg" alt="Shangri-La Beach Resort" width="150" height="150">
+  <img src="./public/shangri-la-logo.svg" alt="Shangri-La Beach Resort" width="500">
 </p>
 
 ## 🌴 Overview
