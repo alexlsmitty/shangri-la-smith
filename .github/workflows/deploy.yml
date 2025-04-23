@@ -63,3 +63,5 @@ jobs:
           branch: gh-pages
           # Clean any existing files in the target branch
           clean: true
+          # Use GitHub's token with the right permissions
+          token: ${{ secrets.GITHUB_TOKEN }}
