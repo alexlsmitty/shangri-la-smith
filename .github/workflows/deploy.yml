@@ -21,23 +21,31 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build with path fixes
+      - name: Create simple build
         run: |
+          # Update vite.config.js to ensure it has the right base path
+          echo "
+          import { defineConfig } from 'vite'
+          import vue from '@vitejs/plugin-vue'
+
+          export default defineConfig({
+            base: '/shangri-la-smith/',
+            plugins: [vue()]
+          })
+          " > vite.config.js
+          
+          # Build the project
           npm run build
-          echo "Fixing asset paths for GitHub Pages..."
-          find dist -name "*.html" -exec sed -i 's|src="/|src="/shangri-la-smith/|g' {} \;
-          find dist -name "*.html" -exec sed -i 's|href="/|href="/shangri-la-smith/|g' {} \;
-          find dist -name "*.js" -exec sed -i 's|"/assets/|"/shangri-la-smith/assets/|g' {} \;
-          find dist -name "*.js" -exec sed -i 's|"/src/|"/shangri-la-smith/src/|g' {} \;
-          echo "Creating 404.html for SPA routing..."
+          
+          # Add redirects for SPA
           cp dist/index.html dist/404.html
+          
+          # Ensure no Jekyll processing
+          touch dist/.nojekyll
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_OPENWEATHER_API_KEY: ${{ secrets.VITE_OPENWEATHER_API_KEY }}
-
-      - name: Create .nojekyll file
-        run: touch ./dist/.nojekyll
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4

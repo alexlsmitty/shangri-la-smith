@@ -9,7 +9,7 @@ git add .
 
 echo.
 echo Committing changes...
-git commit -m "Fix GitHub Pages deployment with simplified approach"
+git commit -m "Fix build error and simplify deployment"
 
 echo.
 echo Pushing to GitHub...
