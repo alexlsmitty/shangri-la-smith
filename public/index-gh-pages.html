@@ -2,7 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <link rel="icon" href="./favicon.png">
+    <base href="/shangri-la-smith/">
+    <link rel="icon" href="favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shangri-La Beach Resort - Luxury Tropical Paradise</title>
     <meta name="description" content="Experience luxury and tranquility at Shangri-La Beach Resort. Enjoy pristine beaches, world-class dining, spa services, and exclusive accommodations. Book your dream vacation today!">
@@ -10,8 +11,8 @@
     <meta name="author" content="Shangri-La Beach Resort">
     <meta property="og:title" content="Shangri-La Beach Resort - Luxury Tropical Paradise">
     <meta property="og:description" content="Experience luxury and tranquility at Shangri-La Beach Resort. Book your dream vacation today!">
-    <meta property="og:image" content="./meta/og-image.jpg">
-    <meta property="og:url" content="https://shangri-la-beach-resort.vercel.app">
+    <meta property="og:image" content="meta/og-image.jpg">
+    <meta property="og:url" content="https://alexlsmitty.github.io/shangri-la-smith/">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="theme-color" content="#00a69c">
@@ -22,6 +23,10 @@
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="./src/main.js"></script>
+    <!-- GitHub Pages Path Correction -->
+    <script>
+      // Tell Vite build system this is the correct base path for GitHub Pages
+      window.PUBLIC_PATH = '/shangri-la-smith/';
+    </script>
   </body>
 </html>

@@ -12,6 +12,8 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    // Use our GitHub Pages specific index.html
+    template: 'public/index-gh-pages.html',
     assetsInlineLimit: 4096, // Default size for inlining small assets (4kb)
     chunkSizeWarningLimit: 1000, // Increase warning limit
     sourcemap: false, // Disable sourcemaps in production
