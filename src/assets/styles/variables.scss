@@ -1,0 +1,22 @@
+// src/assets/styles/variables.scss
+// Custom Vuetify variables
+
+// Resort theme colors
+$primary-color: #03a9f4;   // Ocean blue
+$secondary-color: #ff9800; // Sunset orange 
+$accent-color: #8bc34a;    // Tropical green
+
+// Typography
+$body-font-family: 'Roboto', sans-serif;
+$heading-font-family: 'Playfair Display', serif;
+
+// Custom spacing
+$section-spacing: 4rem;
+$card-spacing: 1.5rem;
+
+// Breakpoints (keeping Vuetify defaults)
+// xs: 0px
+// sm: 600px
+// md: 960px
+// lg: 1280px
+// xl: 1920px

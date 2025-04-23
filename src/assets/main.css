@@ -1,0 +1,222 @@
+@import './base.css';
+
+:root {
+  /* Primary Resort Theme Colors */
+  --shangri-la-teal: #00a69c;
+  --shangri-la-teal-light: #4dccc2;
+  --shangri-la-teal-dark: #00756e;
+  
+  /* Secondary Colors */
+  --shangri-la-coral: #ff7d5e;
+  --shangri-la-coral-light: #ffa48e;
+  --shangri-la-coral-dark: #d45e44;
+  
+  /* Neutral Colors */
+  --shangri-la-sand: #f5f0e6;
+  --shangri-la-sand-dark: #e0d6c4;
+  --shangri-la-deep-blue: #0d2e4d;
+  
+  /* Accent Colors */
+  --shangri-la-gold: #e6c75c;
+  --shangri-la-seafoam: #a5ded1;
+  
+  /* Background Colors */
+  --shangri-la-bg-light: #f8f9fa;
+  --shangri-la-bg-blue: #f0f7fa;
+  
+  /* Status Colors */
+  --shangri-la-success: #4caf50;
+  --shangri-la-warning: #ff9800;
+  --shangri-la-error: #f44336;
+  
+  /* Typography */
+  --shangri-la-heading-font: 'Playfair Display', serif;
+  --shangri-la-body-font: 'Raleway', sans-serif;
+  
+  /* Spacing */
+  --shangri-la-spacing-unit: 8px;
+  --shangri-la-spacing-xs: calc(var(--shangri-la-spacing-unit) * 1);
+  --shangri-la-spacing-sm: calc(var(--shangri-la-spacing-unit) * 2);
+  --shangri-la-spacing-md: calc(var(--shangri-la-spacing-unit) * 3);
+  --shangri-la-spacing-lg: calc(var(--shangri-la-spacing-unit) * 5);
+  --shangri-la-spacing-xl: calc(var(--shangri-la-spacing-unit) * 8);
+  
+  /* Border Radius */
+  --shangri-la-border-radius-sm: 4px;
+  --shangri-la-border-radius-md: 8px;
+  --shangri-la-border-radius-lg: 16px;
+  --shangri-la-border-radius-xl: 24px;
+  
+  /* Shadows */
+  --shangri-la-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shangri-la-shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12);
+  --shangri-la-shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.15);
+  --shangri-la-shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.18);
+}
+
+/* Make the core Vuetify theme variables use our custom variables */
+.v-application {
+  --v-primary-base: var(--shangri-la-teal) !important;
+  --v-primary-lighten1: var(--shangri-la-teal-light) !important;
+  --v-primary-darken1: var(--shangri-la-teal-dark) !important;
+  --v-secondary-base: var(--shangri-la-coral) !important;
+  --v-secondary-lighten1: var(--shangri-la-coral-light) !important;
+  --v-secondary-darken1: var(--shangri-la-coral-dark) !important;
+  --v-accent-base: var(--shangri-la-gold) !important;
+}
+
+#app {
+  max-width: 100vw;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+  font-family: var(--shangri-la-body-font);
+  color: var(--shangri-la-deep-blue);
+  background-color: var(--shangri-la-bg-light);
+}
+
+h1, h2, h3, h4, h5, h6, .text-h1, .text-h2, .text-h3, .text-h4, .text-h5, .text-h6 {
+  font-family: var(--shangri-la-heading-font);
+  color: var(--shangri-la-deep-blue);
+  letter-spacing: 0.01em;
+}
+
+.text-primary {
+  color: var(--shangri-la-teal) !important;
+}
+
+.text-secondary {
+  color: var(--shangri-la-coral) !important;
+}
+
+.bg-primary {
+  background-color: var(--shangri-la-teal) !important;
+}
+
+.bg-secondary {
+  background-color: var(--shangri-la-coral) !important;
+}
+
+.bg-light-blue {
+  background-color: var(--shangri-la-bg-blue);
+}
+
+a {
+  text-decoration: none;
+  color: var(--shangri-la-teal);
+  transition: 0.4s;
+}
+
+a:hover {
+  color: var(--shangri-la-teal-dark);
+}
+
+/* Button Styles */
+.v-btn {
+  letter-spacing: 0.03em;
+  text-transform: none;
+  font-weight: 600;
+}
+
+.v-btn--rounded {
+  border-radius: 100px !important;
+}
+
+/* Card Styles */
+.v-card {
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.v-card:hover {
+  box-shadow: var(--shangri-la-shadow-lg);
+}
+
+/* Animation Classes */
+.fade-in {
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+.slide-up {
+  animation: slideUp 0.8s ease-in-out;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.8s ease-in-out;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.8s ease-in-out;
+}
+
+/* Animation Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(30px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes slideInRight {
+  from { 
+    opacity: 0; 
+    transform: translateX(50px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+}
+
+@keyframes slideInLeft {
+  from { 
+    opacity: 0; 
+    transform: translateX(-50px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+}
+
+/* Media Queries */
+@media (max-width: 960px) {
+  .hide-on-sm {
+    display: none !important;
+  }
+}
+
+@media (max-width: 600px) {
+  h1, .text-h1 {
+    font-size: 2.4rem !important;
+  }
+  
+  h2, .text-h2 {
+    font-size: 2rem !important;
+  }
+  
+  h3, .text-h3 {
+    font-size: 1.6rem !important;
+  }
+}
+
+/* Loading and Transitions */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.3s, transform 0.3s;
+}
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}

@@ -1,0 +1,11 @@
+{
+  "name": "shangri-la-api",
+  "version": "1.0.0",
+  "description": "API for Shangri-La Beach Resort",
+  "type": "commonjs",
+  "main": "index.js",
+  "dependencies": {
+    "sqlite": "^5.0.1",
+    "sqlite3": "^5.1.6"
+  }
+}
