@@ -1,67 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Page Not Found - Shangri-La Beach Resort</title>
+  <meta charset="utf-8">
+  <title>Redirecting...</title>
   <script>
-    // Single-page app routing for GitHub Pages
-    (function() {
-      // Repository name in GitHub
-      var repo = 'shangri-la-smith';
-      var pathSegmentsToKeep = 1; // Keeps just the repo name in the path
+    // Single Page Apps for GitHub Pages
+    // MIT License
+    // https://github.com/rafgraph/spa-github-pages
+    // This script takes the current URL and converts the path and query
+    // string into just a query string, and then redirects the browser
+    // to the new URL with only a query string and hash fragment
+    
+    // If you're creating a Project Pages site and NOT using a custom domain,
+    // then set pathSegmentsToKeep to 1 (enterprise users may need to set it to > 1).
+    // This way the code will only replace the route part of the path, and not
+    // the real directory in which the app resides, for example:
+    // https://username.github.io/repo-name/one/two?a=b&c=d#qwe becomes
+    // https://username.github.io/repo-name/?/one/two&a=b~and~c=d#qwe
+    // Otherwise, leave pathSegmentsToKeep as 0.
+    var pathSegmentsToKeep = 1;
 
-      var l = window.location;
-      
-      // Get the current URL path excluding the repo name
-      var segmentCount = 0;
-      var location = window.location.pathname;
-      
-      // Handle repo name in the path
-      if (location.indexOf('/' + repo + '/') === 0) {
-        segmentCount = 1; // Count for the repo name segment
-        path = location.substring(('/' + repo).length);
-      } else {
-        path = location;
-      }
-      
+    var l = window.location;
+    
+    // Don't run the redirect script on actual local 404s
+    if (l.pathname.split('/')[1] === '404.html') {
+      window.location.href = '/shangri-la-smith/';
+    } else {
+      var repoName = 'shangri-la-smith';
       l.replace(
         l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        '/' + repo + '/' + 
-        (path.startsWith('/') ? path.substr(1) : path) +
-        (l.search ? l.search : '') +
+        '/' + repoName + '/' +
+        '?redirect=' +
+        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
         l.hash
       );
-    })();
+    }
   </script>
-  <style>
-    body {
-      font-family: 'Montserrat', sans-serif;
-      background-color: #f5f9fd;
-      color: #333;
-      text-align: center;
-      padding: 50px 20px;
-      margin: 0;
-    }
-    h1 {
-      color: #00a69c;
-      font-size: 2rem;
-    }
-    p {
-      margin: 20px 0;
-      font-size: 1.1rem;
-    }
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-    }
-  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Page Not Found</h1>
-    <p>Redirecting you to the homepage...</p>
-    <p>If you are not redirected automatically, please <a href="/shangri-la-smith/">click here</a>.</p>
-  </div>
+  <h2>Redirecting...</h2>
+  <p>If you are not redirected automatically, <a href="/shangri-la-smith/">click here</a>.</p>
 </body>
 </html>

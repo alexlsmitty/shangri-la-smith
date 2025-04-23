@@ -6,44 +6,55 @@ import vuetify from './plugins/vuetify'
 // Import styles last
 import './assets/main.css'
 
-// Check if we have a redirect parameter (for GitHub Pages 404 handling)
-const handleGitHubPagesRedirect = () => {
-  const searchParams = new URLSearchParams(window.location.search)
-  const redirectPath = searchParams.get('redirect')
+// Check if we're on GitHub Pages
+const isGitHubPages = window.location.hostname.includes('github.io');
+const basePath = isGitHubPages ? '/shangri-la-smith/' : '/';
+
+// Handle GitHub Pages base path
+if (isGitHubPages) {
+  console.log('Running on GitHub Pages with base path:', basePath);
   
-  if (redirectPath) {
-    console.log('Handling GitHub Pages redirect to:', redirectPath)
+  // Add base path to router
+  router.options.history.base = basePath;
+  
+  // Handle GitHub Pages SPA routing
+  const handleGitHubPagesRedirect = () => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const redirectPath = searchParams.get('redirect');
     
-    // Clean the URL by removing the query parameter
-    const basePath = window.location.pathname.split('?')[0]
-    window.history.replaceState({}, document.title, basePath)
-    
-    // Use router to navigate to the correct route
-    // Make sure to add leading slash if not present and remove trailing slash
-    let formattedPath = redirectPath
-    if (!formattedPath.startsWith('/')) {
-      formattedPath = '/' + formattedPath
+    if (redirectPath) {
+      console.log('Handling GitHub Pages redirect to:', redirectPath);
+      
+      // Clean the URL by removing the query parameter
+      const currentPath = window.location.pathname.split('?')[0];
+      window.history.replaceState({}, document.title, currentPath);
+      
+      // Format the path correctly
+      let formattedPath = redirectPath;
+      if (formattedPath.startsWith(basePath)) {
+        formattedPath = formattedPath.substring(basePath.length);
+      }
+      if (!formattedPath.startsWith('/')) {
+        formattedPath = '/' + formattedPath;
+      }
+      
+      // Use router to navigate
+      if (formattedPath && formattedPath !== '/') {
+        router.push(formattedPath);
+      }
     }
-    if (formattedPath.length > 1 && formattedPath.endsWith('/')) {
-      formattedPath = formattedPath.slice(0, -1)
-    }
-    
-    // Prevent routing to empty paths
-    if (formattedPath && formattedPath !== '/') {
-      router.push(formattedPath)
-    }
-  }
+  };
+  
+  // Run after app is mounted
+  setTimeout(handleGitHubPagesRedirect, 0);
 }
 
 // Create the Vue application
-const app = createApp(App)
+const app = createApp(App);
 
 // Use plugins
-app.use(router)
-app.use(vuetify)
+app.use(router);
+app.use(vuetify);
 
 // Mount the app
-app.mount('#app')
-
-// Handle GitHub Pages redirects after mount
-handleGitHubPagesRedirect()
+app.mount('#app');
