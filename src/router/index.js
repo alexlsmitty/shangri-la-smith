@@ -1,7 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import NotFoundView from '../views/NotFoundView.vue'
-import { BASE_PATH } from '@/config/paths'
+
+// Base path for GitHub Pages - will be overridden in main.js if needed
+const BASE_PATH = '/';
 
 // Mock Auth Service for deployment
 const AuthService = {

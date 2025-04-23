@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import { createWebHistory } from 'vue-router'
 import App from './App.vue'
 import router from './router'
 import vuetify from './plugins/vuetify'
@@ -14,8 +15,9 @@ const basePath = isGitHubPages ? '/shangri-la-smith/' : '/';
 if (isGitHubPages) {
   console.log('Running on GitHub Pages with base path:', basePath);
   
-  // Add base path to router
+  // Override router base path for GitHub Pages
   router.options.history.base = basePath;
+  router.options.history = createWebHistory(basePath);
   
   // Handle GitHub Pages SPA routing
   const handleGitHubPagesRedirect = () => {
