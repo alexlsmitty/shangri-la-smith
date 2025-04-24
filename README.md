@@ -23,6 +23,7 @@ The Shangri-La Beach Resort website showcases the resort's luxury accommodations
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Vue.js 3**: Utilizing the Composition API with `<script setup>` syntax
 - **Vuetify 3**: Material Design component framework
 - **Vue Router**: Client-side routing with code splitting
@@ -30,6 +31,7 @@ The Shangri-La Beach Resort website showcases the resort's luxury accommodations
 - **SASS/SCSS**: Enhanced styling with variables and mixins
 
 ### Backend
+
 - **Supabase**: PostgreSQL database with authentication and storage
 - **Express.js**: API server for custom endpoints
 - **Serverless Functions**: Deployed on Vercel
@@ -37,43 +39,51 @@ The Shangri-La Beach Resort website showcases the resort's luxury accommodations
 ## 📋 Pages & Features
 
 ### Homepage
+
 - Hero section with resort showcase and call-to-action
 - Features grid highlighting key amenities
 - Room previews with quick booking links
 - Testimonials carousel
 
 ### Accommodations
+
 - Multiple room types with detailed information
 - Image galleries and amenity lists
 - Availability checking and booking widgets
 
 ### Dining
+
 - Profiles of resort restaurants and lounges
 - Menu previews and ambiance photos
 - Special dietary accommodations information
 
 ### Spa Services
+
 - Complete treatment catalog with pricing
 - Appointment booking system
 - Wellness program information
 
 ### Activities & Excursions
+
 - On-site activities and off-site excursions
 - Booking information and photo galleries
 
 ### User Account System
+
 - Authentication and profile management
 - Booking history and management tools
 
 ## 🔧 Installation & Setup
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/alexlsmitty/shangri-la-smith.git
    cd shangri-la-smith
    ```
 
 2. **Install dependencies**:
+
    ```bash
    npm install
    ```
@@ -93,11 +103,13 @@ The application will be available at http://localhost:5173/
 The project is configured for deployment on both Vercel and GitHub Pages:
 
 ### Vercel Deployment
+
 - Connect GitHub repository to Vercel
 - Configure build settings (`npm run build`, output directory: `dist`)
 - Add required environment variables
 
 ### GitHub Pages Deployment
+
 - The site is deployed via GitHub Actions using the included workflow
 - Automatically builds and deploys to GitHub Pages on push to main branch
 - Available at [https://alexlsmitty.github.io/shangri-la-smith/](https://alexlsmitty.github.io/shangri-la-smith/)
@@ -135,3 +147,5 @@ The project is configured for deployment on both Vercel and GitHub Pages:
 - Updated build configuration to ensure correct asset paths
 - Improved script loading with proper Vite path handling
 - Added importmap for external dependency resolution
+
+## Made by Alexander Smith
