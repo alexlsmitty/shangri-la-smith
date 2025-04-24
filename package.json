@@ -18,9 +18,10 @@
     "verify-deployment": "node --experimental-json-modules deployment-check.js",
     "build-check": "node --experimental-json-modules build-check.js",
     "analyze": "vite build --mode analyze",
-    "build:github": "vite build",
+    "build:github": "node scripts/build.js",
     "check-size": "node scripts/check-page-size.js",
-    "lint:frontend": "eslint src/ --fix"
+    "lint:frontend": "eslint src/ --fix",
+    "fix-paths": "node scripts/fix-paths.js"
   },
   "dependencies": {
     "@mdi/font": "^7.3.67",

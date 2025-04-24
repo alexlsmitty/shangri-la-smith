@@ -29,17 +29,11 @@ jobs:
       
       - name: Build the site
         run: |
-          # Build specifically for GitHub Pages
-          npm run build
+          # Build specifically for GitHub Pages with path fixing
+          npm run build:github
           
           # Check the build output
           ls -la dist/
-          
-          # Create .nojekyll file
-          touch dist/.nojekyll
-          
-          # Copy index.html to 404.html for SPA routing
-          cp dist/index.html dist/404.html
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
