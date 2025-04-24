@@ -4,35 +4,36 @@
   <meta charset="utf-8">
   <title>Redirecting...</title>
   <script>
-    // SPA Redirect for GitHub Pages
-    // =============================
-    // This script takes the current URL and converts the path and query
-    // string into just a query string, then redirects the browser to the
-    // new URL with only a query string and hash fragment.
+    // GitHub Pages SPA redirection
+    // ============================
     
-    // Parse the URL
-    var pathSegmentsToKeep = 1; // Keep the first segment (repo name)
-    var l = window.location;
+    // This page handles direct access to your GitHub Pages SPA routes.
+    // When someone visits a URL like example.github.io/your-repo/some/path directly,
+    // this script redirects them to the SPA with the right path.
     
-    // Get the path without the first segment (repo name)
-    var repoName = l.pathname.split('/')[1];
-    var path = l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/');
-    
-    // Redirect to the root with the path as a 'p' parameter
-    var redirectUrl = l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + 
-                      '/' + repoName + '/?p=/' + path + 
-                      (l.search ? '&q=' + l.search.slice(1) : '') + 
-                      l.hash;
-    
-    // Perform the redirection
-    window.location.replace(redirectUrl);
+    (function() {
+      // Get the repo name from the URL path
+      var segments = window.location.pathname.split('/');
+      var repo = segments[1];
+      
+      // Get the path beyond the repo name
+      var path = '/' + segments.slice(2).join('/');
+      
+      // Redirect to the main page with the proper path
+      var redirectUrl = window.location.origin + '/' + repo + '/#' + path;
+      window.location.replace(redirectUrl);
+    })();
   </script>
 </head>
 <body>
   <h1>Redirecting...</h1>
-  <p>If you are not redirected automatically, <a id="redirect-link" href="">click here</a>.</p>
+  <p>If you are not redirected automatically, <a id="redirect-link" href="/">click here</a>.</p>
   <script>
-    document.getElementById('redirect-link').setAttribute('href', window.location.href);
+    // Update the redirect link
+    var segments = window.location.pathname.split('/');
+    var repo = segments[1];
+    var path = '/' + segments.slice(2).join('/');
+    document.getElementById('redirect-link').setAttribute('href', window.location.origin + '/' + repo + '/#' + path);
   </script>
 </body>
 </html>

@@ -29,12 +29,18 @@ jobs:
       
       - name: Build the site
         run: |
-          # Show Node.js version
+          # Show versions for debugging
           node --version
           npm --version
           
-          # Build specifically for GitHub Pages
-          npm run build:github
+          # Standard Vite build with GitHub Pages base path
+          vite build --base=/shangri-la-smith/
+          
+          # Create .nojekyll file
+          touch dist/.nojekyll
+          
+          # Copy index.html to 404.html for SPA routing
+          cp dist/index.html dist/404.html
           
           # Check the build output
           ls -la dist/
