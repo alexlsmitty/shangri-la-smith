@@ -257,10 +257,6 @@ const logoColor = ref('#ffffff')
   background: linear-gradient(to bottom, var(--shangri-la-teal-dark), var(--shangri-la-teal));
 }
 
-.drawer-logo {
-  /* Styles for logo in drawer - no need for filter since color is passed as prop */
-}
-
 .drawer-weather {
   width: 100%;
   display: flex;

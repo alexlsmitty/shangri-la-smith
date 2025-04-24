@@ -233,6 +233,9 @@ const subscribeToNewsletter = () => {
                   Alexander Smith
                 </span>
               </p>
+              <p class="text-white text-body-2 mt-2 photo-attribution">
+                All photographs were taken on resort or provided by Pexels, a repository for images which allows free, unlimited use of their images under specific guidelines of their license.
+              </p>
             </v-col>
           </v-row>
         </v-container>
@@ -404,6 +407,13 @@ const subscribeToNewsletter = () => {
 
 .footer-attribution {
   opacity: 0.7;
+}
+
+.photo-attribution {
+  font-size: 0.8rem;
+  opacity: 0.6;
+  max-width: 80%;
+  margin: 10px auto 0;
 }
 
 /* Animation classes */
