@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script>
+      // Handle SPA routes for GitHub Pages
+      (function() {
+        // Check if we need to redirect
+        var l = window.location;
+        if (l.search) {
+          var q = {};
+          l.search.slice(1).split('&').forEach(function(v) {
+            var a = v.split('=');
+            q[a[0]] = a.length > 1 ? a[1] : true;
+          });
+          if (q.p !== undefined) {
+            window.history.replaceState(null, null, l.pathname.split('?')[0] + (q.p || '') + (q.q ? ('?' + q.q) : '') + l.hash);
+          }
+        }
+      })();
+    </script>
     <meta charset="UTF-8">
     <base href="/shangri-la-smith/shangri-la-smith/">
     <link rel="icon" href="./favicon.png">
@@ -32,8 +49,8 @@
       }
     }
     </script>
-    <script type="module" crossorigin src="/shangri-la-smith/shangri-la-smith/assets/index-kzOsGLs0.js"></script>
-    <link rel="stylesheet" crossorigin href="/shangri-la-smith/shangri-la-smith/assets/index-Dqi0_wB7.css">
+    <script type="module" crossorigin src="/shangri-la-smith/shangri-la-smith/assets/main.DrHvUXgs.js"></script>
+    <link rel="stylesheet" crossorigin href="/shangri-la-smith/shangri-la-smith/assets/main.BjEMkZOn.css">
   </head>
   <body>
     <div id="app"></div>
