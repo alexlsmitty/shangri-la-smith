@@ -1,9 +1,14 @@
 /**
  * Custom build script that ensures all asset paths are correctly set for GitHub Pages
  */
-const { build } = require('vite');
-const path = require('path');
-const fs = require('fs');
+import { build } from 'vite';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+// Get the current file's directory using ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function buildForGitHubPages() {
   console.log('Starting custom build for GitHub Pages...');
@@ -29,7 +34,7 @@ async function buildForGitHubPages() {
     console.log('Vite build completed');
     
     // Now fix any path issues in the generated HTML
-    await require('./fix-paths.js');
+    await import('./fix-paths.js');
     
     // Create the necessary files for GitHub Pages
     const distDir = path.resolve(__dirname, '../dist');

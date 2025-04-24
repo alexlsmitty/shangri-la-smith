@@ -3,8 +3,13 @@
  * to properly reference the GitHub Pages repository base path
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Get the current file's directory using ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Repository name - this needs to match your GitHub repo name
 const REPO_NAME = 'shangri-la-smith';
@@ -25,7 +30,7 @@ let htmlContent = fs.readFileSync(INDEX_HTML, 'utf8');
 htmlContent = htmlContent.replace(/"\/(assets\/[^"]+)"/g, `"/${REPO_NAME}/$1"`);
 
 // 2. Fix script modules directly
-htmlContent = htmlContent.replace(/"\/src\/([^"]+)"/g, `"/${REPO_NAME}/src/$1"`);
+htmlContent = htmlContent.replace(/"\/(src\/[^"]+)"/g, `"/${REPO_NAME}/$1"`);
 
 // 3. Handle various types of assets
 htmlContent = htmlContent.replace(/"\/src\//g, `"/${REPO_NAME}/src/`);
@@ -43,3 +48,9 @@ fs.writeFileSync(FOUR_OH_FOUR_HTML, htmlContent);
 console.log('Created 404.html with fixed paths');
 
 console.log('Path fixing completed successfully.');
+
+// Export a default function for ESM compatibility
+export default function fixPaths() {
+  console.log('Fix paths function called');
+  // Function wrapper to allow import
+}

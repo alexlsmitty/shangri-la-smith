@@ -29,7 +29,11 @@ jobs:
       
       - name: Build the site
         run: |
-          # Build specifically for GitHub Pages with path fixing
+          # Show Node.js version
+          node --version
+          npm --version
+          
+          # Build specifically for GitHub Pages
           npm run build:github
           
           # Check the build output
